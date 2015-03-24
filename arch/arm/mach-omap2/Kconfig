@@ -189,7 +189,7 @@ config MACH_OMAP3EVM
 config WIFI_CONTROL_FUNC
         bool "Enable WiFi control function abstraction"
 # 20110701 real-wifi@lge.com by wo0gi, Add CONFIG_MACH_LGE_HDK [START]
-	depends on MACH_OMAP_4430SDP || MACH_OMAP_ZOOM2 || MACH_OMAP_ZOOM3 || MACH_LGE
+	depends on MACH_OMAP_4430SDP || MACH_OMAP_ZOOM2 || MACH_OMAP_ZOOM3 || MACH_LGE_U2 || MACH_LGE_CX2 || MACH_LGE_P2
 # 20110701 real-wifi@lge.com by wo0gi, Add CONFIG_MACH_LGE_HDK [END]
 # 122011 x0136505@ti.com by Prakash for CDC driver support 
 # LGE can change this accordingly
@@ -565,6 +565,21 @@ config OMAP_RFKILL_STE_MODEM
 	  OMAP platforms. This will permit control of power on and off sequences
 	  of the modem as well as necessary dynamic pin muxing of AP/CP
 	  interfaces (platform data dependant)
+
+config OMAP4430_CPU_OVERCLOCK
+	bool "Enables OMAP 4430 CPU overclock"
+	depends on ARCH_OMAP4
+	default n
+
+config OMAP4430_GPU_OVERCLOCK
+	bool "Enables OMAP 4430 GPU overclock"
+	depends on ARCH_OMAP4
+	default n
+
+config OMAP4430_IVA_OVERCLOCK
+	bool "Enables OMAP 4430 IVA (Multimedia DSP) overclock"
+	depends on ARCH_OMAP4
+	default n
 
 endmenu
 

@@ -89,39 +89,75 @@ struct omap4_ldo_abb_trim_data {
  * voltage dependent data for each VDD.
  */
 
+#if defined( CONFIG_OMAP4430_CPU_OVERCLOCK ) || defined( CONFIG_OMAP4430_GPU_OVERCLOCK ) || defined( CONFIG_OMAP4430_IVA_OVERCLOCK )
+#define CONFIG_OMAP4430_OVERCLOCK
+#endif
+
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+
+#define OMAP4430_VDD_MPU_OPP25_UV		 995000 //  200 Mhz
+#define OMAP4430_VDD_MPU_OPP50_UV		1010000 //  300 Mhz
+#define OMAP4430_VDD_MPU_OPP100_UV		1185000 //  600 Mhz
+#define OMAP4430_VDD_MPU_OPPTURBO_UV		1310000 //  800 Mhz
+#define OMAP4430_VDD_MPU_OPPNITRO_UV		1375000 // 1008 Mhz
+#define OMAP4430_VDD_MPU_OPPNITROSB_UV		1385000 // 1200 Mhz
+#define OMAP4430_VDD_MPU_OPPNITROSB2_UV		1395000 // 1350 Mhz
+
+#else
+
 #define OMAP4430_VDD_MPU_OPP50_UV		1025000
 #define OMAP4430_VDD_MPU_OPP100_UV		1200000
 #define OMAP4430_VDD_MPU_OPPTURBO_UV		1325000
 #define OMAP4430_VDD_MPU_OPPNITRO_UV		1388000
 #define OMAP4430_VDD_MPU_OPPNITROSB_UV		1398000
 
+#endif
+
 
 struct omap_volt_data omap443x_vdd_mpu_volt_data[] = {
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPP25_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPP25, 0xf4, 0x0c, OMAP_ABB_NOMINAL_OPP),
+#endif
 	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPP50_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPP50, 0xf4, 0x0c, OMAP_ABB_NOMINAL_OPP),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPP100_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPP100, 0xf9, 0x16, OMAP_ABB_NOMINAL_OPP),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPPTURBO_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPPTURBO, 0xfa, 0x23, OMAP_ABB_NOMINAL_OPP),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPPNITRO_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPPNITRO, 0xfa, 0x27, OMAP_ABB_FAST_OPP),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPPNITROSB_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPPNITROSB, 0xfa, 0x27, OMAP_ABB_FAST_OPP),
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+	VOLT_DATA_DEFINE(OMAP4430_VDD_MPU_OPPNITROSB2_UV, 0, OMAP44XX_CONTROL_FUSE_MPU_OPPNITROSB2, 0xfa, 0x27, OMAP_ABB_FAST_OPP),
+#endif
 	VOLT_DATA_DEFINE(0, 0, 0, 0, 0, 0),
 };
 
 #define OMAP4430_VDD_IVA_OPP50_UV		 950000
 #define OMAP4430_VDD_IVA_OPP100_UV		1114000
 #define OMAP4430_VDD_IVA_OPPTURBO_UV		1291000
+#ifdef CONFIG_OMAP4430_OVERCLOCK
+#define OMAP4430_VDD_IVA_OPPNITRO_UV		1375000
+#endif
 
 struct omap_volt_data omap443x_vdd_iva_volt_data[] = {
 	VOLT_DATA_DEFINE(OMAP4430_VDD_IVA_OPP50_UV, 0, OMAP44XX_CONTROL_FUSE_IVA_OPP50, 0xf4, 0x0c, OMAP_ABB_NOMINAL_OPP),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_IVA_OPP100_UV, 0, OMAP44XX_CONTROL_FUSE_IVA_OPP100, 0xf9, 0x16, OMAP_ABB_NOMINAL_OPP),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_IVA_OPPTURBO_UV, 0, OMAP44XX_CONTROL_FUSE_IVA_OPPTURBO, 0xfa, 0x23, OMAP_ABB_NOMINAL_OPP),
+#ifdef CONFIG_OMAP4430_IVA_OVERCLOCK
+	VOLT_DATA_DEFINE(OMAP4430_VDD_IVA_OPPNITRO_UV, 0, OMAP44XX_CONTROL_FUSE_IVA_OPPNITRO, 0xfa, 0x23, OMAP_ABB_FAST_OPP),
+#endif
 	VOLT_DATA_DEFINE(0, 0, 0, 0, 0, 0),
 };
 
 #define OMAP4430_VDD_CORE_OPP50_UV		 962000
 #define OMAP4430_VDD_CORE_OPP100_UV		1127000
+#ifdef CONFIG_OMAP4430_OVERCLOCK
+#define OMAP4430_VDD_CORE_OPP100_OV_UV		1250000 
+#endif
 
 struct omap_volt_data omap443x_vdd_core_volt_data[] = {
 	VOLT_DATA_DEFINE(OMAP4430_VDD_CORE_OPP50_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP50, 0xf4, 0x0c, OMAP_ABB_NONE),
 	VOLT_DATA_DEFINE(OMAP4430_VDD_CORE_OPP100_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP100, 0xf9, 0x16, OMAP_ABB_NONE),
+#ifdef CONFIG_OMAP4430_OVERCLOCK
+	VOLT_DATA_DEFINE(OMAP4430_VDD_CORE_OPP100_OV_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP100OV, 0xf9, 0x16, OMAP_ABB_FAST_OPP),
+#endif
 	VOLT_DATA_DEFINE(0, 0, 0, 0, 0, 0),
 };
 
@@ -136,11 +172,17 @@ struct omap_volt_data omap443x_vdd_core_volt_data[] = {
 
 /* OMAP 4430 MPU Core VDD dependency table */
 static struct omap_vdd_dep_volt omap443x_vdd_mpu_core_dep_data[] = {
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+	{.main_vdd_volt = OMAP4430_VDD_MPU_OPP25_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP50_UV},
+#endif
 	{.main_vdd_volt = OMAP4430_VDD_MPU_OPP50_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP50_UV},
 	{.main_vdd_volt = OMAP4430_VDD_MPU_OPP100_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
 	{.main_vdd_volt = OMAP4430_VDD_MPU_OPPTURBO_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
 	{.main_vdd_volt = OMAP4430_VDD_MPU_OPPNITRO_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
 	{.main_vdd_volt = OMAP4430_VDD_MPU_OPPNITROSB_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+	{.main_vdd_volt = OMAP4430_VDD_MPU_OPPNITROSB2_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
+#endif
 };
 
 struct omap_vdd_dep_info omap443x_vddmpu_dep_info[] = {
@@ -157,6 +199,9 @@ static struct omap_vdd_dep_volt omap443x_vdd_iva_core_dep_data[] = {
 	{.main_vdd_volt = OMAP4430_VDD_IVA_OPP50_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP50_UV},
 	{.main_vdd_volt = OMAP4430_VDD_IVA_OPP100_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
 	{.main_vdd_volt = OMAP4430_VDD_IVA_OPPTURBO_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
+#ifdef CONFIG_OMAP4430_IVA_OVERCLOCK
+	{.main_vdd_volt = OMAP4430_VDD_IVA_OPPNITRO_UV, .dep_vdd_volt = OMAP4430_VDD_CORE_OPP100_UV},
+#endif
 };
 
 struct omap_vdd_dep_info omap443x_vddiva_dep_info[] = {
@@ -169,6 +214,9 @@ struct omap_vdd_dep_info omap443x_vddiva_dep_info[] = {
 };
 
 static struct omap_opp_def __initdata omap443x_opp_def_list[] = {
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", true, 200000000, OMAP4430_VDD_MPU_OPP25_UV),
+#endif
 	/* MPU OPP1 - OPP50 */
 	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", true, 300000000, OMAP4430_VDD_MPU_OPP50_UV),
 	/* MPU OPP2 - OPP100 */
@@ -177,8 +225,16 @@ static struct omap_opp_def __initdata omap443x_opp_def_list[] = {
 	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", true, 800000000, OMAP4430_VDD_MPU_OPPTURBO_UV),
 	/* MPU OPP4 - OPP-NT */
 	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", true, 1008000000, OMAP4430_VDD_MPU_OPPNITRO_UV),
+#if defined(CONFIG_MACH_LGE_CX2) || defined(CONFIG_OMAP4430_CPU_OVERCLOCK)
+	/* MPU OPP5 - OPP-SB */
+	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", true, 1200000000, OMAP4430_VDD_MPU_OPPNITROSB_UV),
+#else
 	/* MPU OPP5 - OPP-SB */
 	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", false, 1200000000, OMAP4430_VDD_MPU_OPPNITROSB_UV),
+#endif //##	
+#ifdef CONFIG_OMAP4430_CPU_OVERCLOCK
+	OPP_INITIALIZER("mpu", "dpll_mpu_ck", "mpu", true, 1350000000, OMAP4430_VDD_MPU_OPPNITROSB2_UV),
+#endif
 	/* L3 OPP1 - OPP50 */
 	OPP_INITIALIZER("l3_main_1", "virt_l3_ck", "core", true, 100000000, OMAP4430_VDD_CORE_OPP50_UV),
 	/* L3 OPP2 - OPP100, OPP-Turbo, OPP-SB */
@@ -189,10 +245,17 @@ static struct omap_opp_def __initdata omap443x_opp_def_list[] = {
 	OPP_INITIALIZER("iva", "virt_iva_ck", "iva", true, 266100000, OMAP4430_VDD_IVA_OPP100_UV),
 	/* IVA OPP3 - OPP-Turbo */
 	OPP_INITIALIZER("iva", "virt_iva_ck", "iva", true, 332000000, OMAP4430_VDD_IVA_OPPTURBO_UV),
+#ifdef CONFIG_OMAP4430_IVA_OVERCLOCK 
+	/* IVA OPP4 - OPP-Nitro */
+	OPP_INITIALIZER("iva", "virt_iva_ck", "iva", false, 430000000, OMAP4430_VDD_IVA_OPPNITRO_UV),
+#endif
 	/* SGX OPP1 - OPP50 */
 	OPP_INITIALIZER("gpu", "dpll_per_m7x2_ck", "core", true, 153600000, OMAP4430_VDD_CORE_OPP50_UV),
 	/* SGX OPP2 - OPP100 */
 	OPP_INITIALIZER("gpu", "dpll_per_m7x2_ck", "core", true, 307200000, OMAP4430_VDD_CORE_OPP100_UV),
+#ifdef CONFIG_OMAP4430_GPU_OVERCLOCK
+	OPP_INITIALIZER("gpu", "dpll_per_m7x2_ck", "core", true, 384000000, OMAP4430_VDD_CORE_OPP100_UV), // may need to use OV_UV
+#endif
 	/* FDIF OPP1 - OPP25 */
 	OPP_INITIALIZER("fdif", "fdif_fck", "core", true, 32000000, OMAP4430_VDD_CORE_OPP50_UV),
 	/* FDIF OPP2 - OPP50 */
@@ -213,6 +276,10 @@ static struct omap_opp_def __initdata omap443x_opp_def_list[] = {
 	OPP_INITIALIZER("aess", "abe_clk", "iva", true, 98304000, OMAP4430_VDD_IVA_OPP50_UV),
 	/* ABE OPP2 - OPP100 */
 	OPP_INITIALIZER("aess", "abe_clk", "iva", true, 196608000, OMAP4430_VDD_IVA_OPP100_UV),
+	/* DSS OPP1 - OPP50 */
+	OPP_INITIALIZER("dss_dispc", "virt_lcd_pclk", "core", true, 93000000, OMAP4430_VDD_CORE_OPP50_UV),
+	/* DSS OPP2 - OPP100 */
+	OPP_INITIALIZER("dss_dispc", "virt_lcd_pclk", "core", true, 170000000, OMAP4430_VDD_CORE_OPP100_UV),
 };
 
 #define OMAP4460_VDD_MPU_OPP50_UV		1025000
@@ -352,6 +419,10 @@ static struct omap_opp_def __initdata omap446x_opp_def_list[] = {
 	OPP_INITIALIZER("aess", "abe_clk", "iva", true, 98304000, OMAP4460_VDD_IVA_OPP50_UV),
 	/* ABE OPP2 - OPP100 */
 	OPP_INITIALIZER("aess", "abe_clk", "iva", true, 196608000, OMAP4460_VDD_IVA_OPP100_UV),
+	/* DSS OPP1 - OPP50 */
+	OPP_INITIALIZER("dss_dispc", "virt_lcd_pclk", "core", true, 93000000, OMAP4460_VDD_CORE_OPP50_UV),
+	/* DSS OPP2 - OPP100 */
+	OPP_INITIALIZER("dss_dispc", "virt_lcd_pclk", "core", true, 170000000, OMAP4460_VDD_CORE_OPP100_UV),
 };
 
 /*
@@ -388,12 +459,22 @@ struct omap_volt_data omap447x_vdd_iva_volt_data[] = {
 	VOLT_DATA_DEFINE(0, 0, 0, 0, 0, 0),
 };
 
+/*
+ * OPP100H is OPP100 in High Performance OPP set. It uses the same nTarget.
+ * The 1mV difference is introduced just to distinguish a new OPP100 in
+ * OPP dependencies tables and maintain correct dependencies in both OPP sets:
+ * - in Low set if MPU/IVA OPP >= OPP100 then CORE will be at least at OPP100.
+ * - in High set OPP100H voltage is lower than requested OPP100,
+ *   so next higher OPP will be used which is OPP100OV.
+ */
 #define OMAP4470_VDD_CORE_OPP50_UV		 962000
+#define OMAP4470_VDD_CORE_OPP100H_UV		1124000
 #define OMAP4470_VDD_CORE_OPP100_UV		1125000
 #define OMAP4470_VDD_CORE_OPP100_OV_UV		1250000
 
 struct omap_volt_data omap447x_vdd_core_volt_data[] = {
 	VOLT_DATA_DEFINE(OMAP4470_VDD_CORE_OPP50_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP50, 0xf4, 0x0c, OMAP_ABB_NONE),
+	VOLT_DATA_DEFINE(OMAP4470_VDD_CORE_OPP100H_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP100, 0xf9, 0x16, OMAP_ABB_NONE),
 	VOLT_DATA_DEFINE(OMAP4470_VDD_CORE_OPP100_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP100, 0xf9, 0x16, OMAP_ABB_NONE),
 	VOLT_DATA_DEFINE(OMAP4470_VDD_CORE_OPP100_OV_UV, 0, OMAP44XX_CONTROL_FUSE_CORE_OPP100OV, 0xf9, 0x16, OMAP_ABB_NONE),
 	VOLT_DATA_DEFINE(0, 0, 0, 0, 0, 0),
