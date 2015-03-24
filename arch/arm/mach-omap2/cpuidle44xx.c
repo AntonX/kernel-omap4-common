@@ -49,7 +49,8 @@
 #define OMAP4_MAX_STATES	4
 
 /*                                                                          */
-#if 1 
+//#define _DEBUG_IDLE
+#ifdef _DEBUG_IDLE
 unsigned int print_counter=0;
 unsigned int print_counter1=0;
 #define MODULE_NAME 	"Cpuidle44xx"
@@ -68,7 +69,11 @@ unsigned int print_counter1=0;
 		printk(KERN_DEBUG "[%s] Line :(%d): " 		\
 			fmt, MODULE_NAME, __LINE__, ## args); \
 })
+#else 
+#define DBG(fmt, args...)
+#define DBG1(fmt, args...)
 #endif
+
 /*                                                                          */
 static bool disallow_smp_idle;
 module_param(disallow_smp_idle, bool, S_IRUGO | S_IWUSR);

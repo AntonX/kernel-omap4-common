@@ -19,12 +19,13 @@ static struct delayed_work thermal_wk;
 static struct lm3533_platform_data*	pdata_t;
 #endif
 
-#define LM3533_DEBUG 0
- #if LM3533_DEBUG
+//#define LM3533_DEBUG 1
+
+#if LM3533_DEBUG
  #define DEBUG_MSG(args...)  printk(args)
  #else
  #define DEBUG_MSG(args...)
- #endif
+#endif
 
 
 static int	old_brightness	=	-1;

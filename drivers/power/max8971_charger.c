@@ -40,6 +40,14 @@
 #include <linux/hrtimer.h>
 #include <linux/proc_fs.h>              // might need to get fuel gauge info
 
+//
+
+#if 0
+#define DEBUG_MSG(args...)  printk(args)
+#else
+#define DEBUG_MSG(args...) 
+#endif
+
 // define register map
 
 //int charging_done_flag = 0;
@@ -298,7 +306,7 @@ static int __set_charger(struct max8971_chip *chip, int enable)
                    (chip->pdata->dcilmt<<MAX8971_DCILMT_SHIFT));
         max8971_write_reg(chip->client, MAX8971_REG_DCCRNT, reg_val);
 	if( MST_test_mode == 1){
-		printk("[Max8971] MST_test_mode set chgcv 4.1V");
+		DEBUG_MSG("[Max8971] MST_test_mode set chgcv 4.1V");
         	// Set topoff condition
 		chip->pdata->chgcv=0x01;
         	reg_val = ((chip->pdata->topofftime<<MAX8971_TOPOFFTIME_SHIFT) |
@@ -436,7 +444,7 @@ int max8971_start_charging(unsigned mA)
     }
 
     else
-	printk("[max8971_start_chargin] can not find current\n");
+	DEBUG_MSG("[max8971_start_chargin] can not find current\n");
 
 
    // reg_val = max8971_chg->pdata->int_mask=0xF3 ;
@@ -445,7 +453,7 @@ int max8971_start_charging(unsigned mA)
     // charger inserted
     max8971_chg->chg_online = 1;
     max8971_chg->pdata->chgcc = FCHG_CURRENT(mA);
-    printk("[max8971] max8971_chg->pdata->chgcc: 0x%x \n", max8971_chg->pdata->chgcc);
+    DEBUG_MSG("[max8971] max8971_chg->pdata->chgcc: 0x%x \n", max8971_chg->pdata->chgcc);
 
     reg_val = ((FCHG_CURRENT(mA)<<MAX8971_CHGCC_SHIFT) |
                (max8971_chg->pdata->fchgtime<<MAX8971_FCHGTIME_SHIFT));
@@ -459,7 +467,7 @@ int max8971_start_charging(unsigned mA)
       //  reg_val = ((FCHG_CURRENT(450)<<MAX8971_CHGCC_SHIFT) |
 //                   (max8971_chg->pdata->fchgtime<<MAX8971_FCHGTIME_SHIFT));
   //      max8971_write_reg(max8971_chg->client, MAX8971_REG_FCHGCRNT, reg_val);
-//    	printk("[max8971] max8971_chg->pdata->dcilmt: %d \n",i);
+//    	DEBUG_MSG("[max8971] max8971_chg->pdata->dcilmt: %d \n",i);
         udelay(200);
     }
     reg_val = ((max8971_chg->pdata->chgrstrt<<MAX8971_CHGRSTRT_SHIFT) |
@@ -647,12 +655,12 @@ int max8971_stop_charging(void)
     // Charger removed
     if(max8971_chg != NULL )
     {
-	printk(" max8971_chg pointer is not NULL\n");
+	DEBUG_MSG(" max8971_chg pointer is not NULL\n");
      	max8971_chg->chg_online = 0;
     	__set_charger(max8971_chg, 0);
     }
     else
-	printk(" max8971_chg pointer is NULL\n");
+	DEBUG_MSG(" max8971_chg pointer is NULL\n");
 
         charging_ic_status = POWER_SUPPLY_TYPE_BATTERY;
     // Disable GSM TEST MODE
@@ -668,7 +676,7 @@ int max8971_stop_factory_charging(void)
     // Charger removed
     if(max8971_chg != NULL)
     {
-	printk(" max8971_chg pointer is not NULL\n");
+	DEBUG_MSG(" max8971_chg pointer is not NULL\n");
     	max8971_chg->chg_online = 0;
     	__set_charger(max8971_chg, 0);
 
@@ -676,7 +684,7 @@ int max8971_stop_factory_charging(void)
     max8971_set_bits(max8971_chg->client, MAX8971_REG_TOPOFF, MAX8971_IFST2P8_MASK, 0<<MAX8971_IFST2P8_SHIFT);
     }
     else
-        printk(" max8971_chg pointer is NULL\n");
+        DEBUG_MSG(" max8971_chg pointer is NULL\n");
     return 0;
 }
 EXPORT_SYMBOL(max8971_stop_factory_charging);
@@ -806,7 +814,7 @@ EXPORT_SYMBOL(max8971_stop_factory_charging);
 
 int max8971_start_Factory_charging(void)
 {
-    printk("[max8971] max8971_start_Factory_charging\n");
+    DEBUG_MSG("[max8971] max8971_start_Factory_charging\n");
     u8 reg_val=0;
     charging_ic_status = POWER_SUPPLY_TYPE_FACTORY;
     reg_val = MAX8971_CHGPROT_UNLOCKED<<MAX8971_CHGPROT_SHIFT;
@@ -828,7 +836,7 @@ static int max8971_charger_get_property(struct power_supply *psy,
 	struct max8971_chip *chip = container_of(psy, struct max8971_chip, charger);
 	int ret = 0;
     	int chg_dtls_val;
-	printk(" max8971_charger_get_property: psp= %d\n",psp);
+	DEBUG_MSG(" max8971_charger_get_property: psp= %d\n",psp);
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -908,7 +916,7 @@ static void max8971_topoff(struct work_struct *max8971_top)
 /*
 ssize_t charging_ic_show_status(struct device *dev, struct device_attribute *attr, char *buf)
 {
-        printk(" charging_ic_status: %d\n", charging_ic_status);
+        DEBUG_MSG(" charging_ic_status: %d\n", charging_ic_status);
 	if(charging_ic_status == POWER_SUPPLY_TYPE_BATTERY)
 		return snprintf(buf, PAGE_SIZE, "0\n");
 	else
@@ -1072,7 +1080,7 @@ static __devinit int max8971_probe(struct i2c_client *client,
 
 
         ret=max8971_read_reg(chip->client, MAX8971_REG_CHGINT);
-        printk(" MAX8971_REG_CHGINT : %d\n", ret);
+        DEBUG_MSG(" MAX8971_REG_CHGINT : %d\n", ret);
 	chip->chg_online = 0;
 	ret = max8971_read_reg(chip->client, MAX8971_REG_CHG_STAT);
 
