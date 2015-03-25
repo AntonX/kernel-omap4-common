@@ -2312,6 +2312,9 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	if (retval)
 		goto dput_out;
 
+  flags &= ~MS_RELATIME;
+  flags |= MS_NOATIME | MS_NODIRATIME;
+
 	/* Default to relatime unless overriden */
 	if (!(flags & MS_NOATIME))
 		mnt_flags |= MNT_RELATIME;
