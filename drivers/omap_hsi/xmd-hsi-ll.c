@@ -444,13 +444,17 @@ static void hsi_ll_read_complete_cb(struct hsi_device *dev, unsigned int size)
 #endif
 #else /* DYNAMIC LOG CONFIG */
 
-    if(simple_hsi_log_debug_enable == '1')
+    if(simple_hsi_log_debug_enable == '1') {
+#if defined (HSI_LL_ENABLE_ERROR_LOG)        
         printk("HSI_LL: channel %d CP => AP CMD = 0x%x.\n", channel, hsi_ll_data.rx_cmd);
-    else {
+#endif
+    } else {
         ipc_temp = hsi_ll_data.rx_cmd;
         ipc_temp = ipc_temp >> 28;
+#if defined (HSI_LL_ENABLE_ERROR_LOG)        
         if(ipc_temp == 9 && channel < 11)
             printk("HSI_LL: CP closed ch[%d] successfully.\n", channel);
+#endif
     }
 #endif /* DYNAMIC LOG CONFIG */
 //                                              
@@ -1052,7 +1056,9 @@ static int hsi_ll_wr_ctrl_ch_th(void *data)
 			wait_event_interruptible(hsi_ll_if.wr_complete,
 									hsi_ll_if.wr_complete_flag == 2);
 			hsi_ll_if.wr_complete_flag = 0;
-			printk("HSI_LL: HSI LL recovery completed .Start CMD transfer\n");
+#if defined (HSI_LL_ENABLE_ERROR_LOG)			
+      printk("HSI_LL: HSI LL recovery completed .Start CMD transfer\n");
+#endif
 		}
 
 		/* Wakeup Other Side */
@@ -1068,13 +1074,17 @@ static int hsi_ll_wr_ctrl_ch_th(void *data)
 		printk("\nHSI_LL: channel %d : AP => CP CMD = 0x%x \n", channel, command);
 #endif
 #else /* DYNAMIC LOG CONFIG */
-    if (simple_hsi_log_debug_enable == '1')
+    if (simple_hsi_log_debug_enable == '1') {
+#if defined (HSI_LL_ENABLE_ERROR_LOG)        
         printk("HSI_LL: channel %d : AP => CP CMD = 0x%x \n", channel, command);
-    else {
+#endif
+    } else {
         ipc_temp = command;
         ipc_temp = ipc_temp >> 28;
+#if defined (HSI_LL_ENABLE_ERROR_LOG)
         if(ipc_temp == 9 && channel < 11)
             printk("HSI_LL: AP closed ch[%d] successfully.\n", channel);
+#endif
     }
 #endif /* DYNAMIC LOG CONFIG */
 //                                              
@@ -1353,8 +1363,10 @@ static void hsi_ll_wakeup_cp(unsigned int val)
 #endif
 	} else {
 		if(hsi_ll_if.psv_event_flag == HSI_LL_PSV_EVENT_PSV_DISABLE) {
-			printk("\nHSI_LL: PSV revoked%s %d\n",
+#if defined (HSI_LL_ENABLE_ERROR_LOG)			
+      printk("\nHSI_LL: PSV revoked%s %d\n",
 					 __func__, __LINE__);
+#endif
 			ret = 0;
 		} else {
 			hsi_ll_data.tx_cfg.ac_wake = HSI_LL_WAKE_LINE_LOW;
@@ -1425,7 +1437,9 @@ static int hsi_ll_psv_th(void *data)
 #else /* PSV mode enhancement : check TX & RX state */
 
 			while(hsi_ll_data.ch[0].tx.state != HSI_LL_TX_STATE_IDLE) {
-				printk("HSI_LL: Ch 0 busy sending DLP CMDs, retry after short delay");
+#if defined (HSI_LL_ENABLE_ERROR_LOG)				
+        printk("HSI_LL: Ch 0 busy sending DLP CMDs, retry after short delay");
+#endif
 				msleep_interruptible(HSI_LL_PV_THREAD_SLEEP_TIME);
 			}
 

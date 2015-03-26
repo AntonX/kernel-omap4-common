@@ -664,9 +664,8 @@ static bool __memcg_event_check(struct mem_cgroup *mem, int target)
 {
 	unsigned long val, next;
 
-	val = this_cpu_read(mem->stat->events[MEM_CGROUP_EVENTS_COUNT]);
-	next = this_cpu_read(mem->stat->targets[target]);
-	/* from time_after() in jiffies.h */
+	val = __this_cpu_read(memcg->stat->events[MEM_CGROUP_EVENTS_COUNT]);
+	next = __this_cpu_read(memcg->stat->targets[target]);	/* from time_after() in jiffies.h */
 	return ((long)next - (long)val < 0);
 }
 
@@ -674,7 +673,7 @@ static void __mem_cgroup_target_update(struct mem_cgroup *mem, int target)
 {
 	unsigned long val, next;
 
-	val = this_cpu_read(mem->stat->events[MEM_CGROUP_EVENTS_COUNT]);
+	val = __this_cpu_read(memcg->stat->events[MEM_CGROUP_EVENTS_COUNT]);
 
 	switch (target) {
 	case MEM_CGROUP_TARGET_THRESH:
@@ -690,7 +689,7 @@ static void __mem_cgroup_target_update(struct mem_cgroup *mem, int target)
 		return;
 	}
 
-	this_cpu_write(mem->stat->targets[target], next);
+	__this_cpu_write(memcg->stat->targets[target], next);
 }
 
 /*
@@ -699,6 +698,7 @@ static void __mem_cgroup_target_update(struct mem_cgroup *mem, int target)
  */
 static void memcg_check_events(struct mem_cgroup *mem, struct page *page)
 {
+	preempt_disable();
 	/* threshold event is triggered in finer grain than soft limit */
 	if (unlikely(__memcg_event_check(mem, MEM_CGROUP_TARGET_THRESH))) {
 		mem_cgroup_threshold(mem);
@@ -718,6 +718,7 @@ static void memcg_check_events(struct mem_cgroup *mem, struct page *page)
 		}
 #endif
 	}
+	preempt_enable();
 }
 
 static struct mem_cgroup *mem_cgroup_from_cont(struct cgroup *cont)
@@ -971,6 +972,7 @@ void mem_cgroup_add_lru_list(struct page *page, enum lru_list lru)
 		return;
 	pc = lookup_page_cgroup(page);
 	VM_BUG_ON(PageCgroupAcctLRU(pc));
+	smp_mb();
 	if (!PageCgroupUsed(pc))
 		return;
 	/* Ensure pc->mem_cgroup is visible after reading PCG_USED. */
@@ -1023,6 +1025,7 @@ static void mem_cgroup_lru_add_after_commit(struct page *page)
 	struct zone *zone = page_zone(page);
 	struct page_cgroup *pc = lookup_page_cgroup(page);
 
+	smp_mb();
 	/* taking care of that the page is added to LRU while we commit it */
 	if (likely(!PageLRU(page)))
 		return;
@@ -1923,7 +1926,7 @@ bool mem_cgroup_handle_oom(struct mem_cgroup *mem, gfp_t mask)
 	if (test_thread_flag(TIF_MEMDIE) || fatal_signal_pending(current))
 		return false;
 	/* Give chance to dying process */
-	schedule_timeout(1);
+	schedule_timeout_uninterruptible(1);
 	return true;
 }
 
@@ -4850,7 +4853,6 @@ static int alloc_mem_cgroup_per_zone_info(struct mem_cgroup *mem, int node)
 	if (!pn)
 		return 1;
 
-	mem->info.nodeinfo[node] = pn;
 	for (zone = 0; zone < MAX_NR_ZONES; zone++) {
 		mz = &pn->zoneinfo[zone];
 		for_each_lru(l)
@@ -4859,6 +4861,7 @@ static int alloc_mem_cgroup_per_zone_info(struct mem_cgroup *mem, int node)
 		mz->on_tree = false;
 		mz->mem = mem;
 	}
+	memcg->info.nodeinfo[node] = pn;
 	return 0;
 }
 

@@ -125,6 +125,6 @@
 
 /* #define HSI_LL_ENABLE_DEBUG_LOG */
 /* #define HSI_LL_ENABLE_CRITICAL_LOG */
-#define HSI_LL_ENABLE_ERROR_LOG
+//#define HSI_LL_ENABLE_ERROR_LOG
 
 #endif /* __XMD_HSI_LL_CFG_H__ */

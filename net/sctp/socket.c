@@ -3801,6 +3801,8 @@ SCTP_STATIC void sctp_destroy_sock(struct sock *sk)
 
 	/* Release our hold on the endpoint. */
 	ep = sctp_sk(sk)->ep;
+	if (ep == NULL)
+		return;
 	sctp_endpoint_free(ep);
 	local_bh_disable();
 	percpu_counter_dec(&sctp_sockets_allocated);

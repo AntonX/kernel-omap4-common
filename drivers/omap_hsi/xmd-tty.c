@@ -63,7 +63,9 @@ static int write_hsi_proc(struct file *file, const char __user *buffer, unsigned
 
     simple_hsi_log_debug_enable = value;
 
+#if defined (XMD_TTY_ENABLE_DEBUG_MSG) || defined(HSI_LL_ENABLE_CRITICAL_LOG)
     printk("proc HSI HSI HSI HSI: %d", value);
+#endif
     return count;
 }
 
@@ -156,11 +158,12 @@ static void xmd_ch_tty_send_to_user(int chno)
 #else
         memcpy(str, buf, len);
 #endif /* HSI_PRIVATE_INFO_PROTECTION */
+#if defined (XMD_TTY_ENABLE_DEBUG_MSG) || defined(HSI_LL_ENABLE_CRITICAL_LOG)
         if(simple_hsi_log_debug_enable == '1')
             printk("xmdtty: Sending data of size %d to ch %d, buf = %s\n", len,chno, left_trim(str));
         else if(chno < 11)
             printk("xmdtty: AP received data size : %d to ch[%d] %s", len,chno, left_trim(str));
-
+#endif
         kfree(str);
     }
 #endif /* DYNAMIC LOG CONFIG */
@@ -202,7 +205,9 @@ static int xmd_ch_tty_open(struct tty_struct *tty, struct file *f)
 	int n = tty->index;
 	int gpio_value = gpio_get_value(122);
 
+#if defined (XMD_TTY_ENABLE_ERR_MSG)
 	printk("xmdtty: gpio 122 value is %d ##########\n", gpio_value);
+#endif
 
 	if (gpio_value)
 		return -EAGAIN;
@@ -352,13 +357,18 @@ static int xmd_ch_tty_write(
 		else /* AT command */
 			max_len = XMD_TTY_AT_MAX_WRITE_SIZE;
 
+#if defined (XMD_TTY_ENABLE_ERR_MSG)
 		if(len > max_len)
 			printk("\nxmdtty: xmd_ch_tty_write len(%d) is bigger than max write size for ch %d\n",
 					len,tty_ch->chno);
+#endif
 
 		memcpy(str, buf, written_len);
-		printk("\nxmdtty: writing data of size %d to ch %d, data: %s\n",
+#if defined (XMD_TTY_ENABLE_ERR_MSG)		
+    printk("\nxmdtty: writing data of size %d to ch %d, data: %s\n",
 					written_len,tty_ch->chno,str);
+#endif
+
 		kfree(str);
 	}
 #endif
@@ -375,9 +385,11 @@ static int xmd_ch_tty_write(
 		else /* AT command */
 			max_len = XMD_TTY_AT_MAX_WRITE_SIZE;
 
+#if defined (XMD_TTY_ENABLE_ERR_MSG)
 		if(len > max_len)
 			printk("\nxmdtty: xmd_ch_tty_write len(%d) is bigger than max write size for ch %d\n",
 					len,tty_ch->chno);
+#endif
 
         if(!((simple_hsi_log_debug_enable == '0') && (tty_ch->chno == 11))) {
             char *str = (char *) kzalloc(written_len + 1, GFP_ATOMIC);
@@ -392,10 +404,13 @@ static int xmd_ch_tty_write(
 #else
             memcpy(str, buf, written_len);
 #endif /* HSI_PRIVATE_INFO_PROTECTION */
+
+#if defined (XMD_TTY_ENABLE_ERR_MSG)
             if(simple_hsi_log_debug_enable == '1')
                 printk("xmdtty: writing data of size %d to ch %d, data: %s\n", written_len,tty_ch->chno,str);
             else if(tty_ch->chno < 11)
 	            printk("xmdtty: CP received data size : %d to ch[%d] %s", written_len,tty_ch->chno,str);
+#endif
 
             kfree(str);
         }
@@ -410,8 +425,9 @@ static int xmd_ch_tty_write(
 #else  //RIL Recovery fail patch
 	//if (0 > xmd_ch_write(tty_ch->chno, (void *)buf, written_len)) {
 	if (-9 == xmd_ch_write(tty_ch->chno, (void *)buf, written_len)) {
-		
+#if defined (XMD_TTY_ENABLE_ERR_MSG)		
 		printk("xmdtty:[RIL Recovery]xmd_ch_tty_write. err= -9\n");
+#endif
 		written_len = -9;
 	}
 #endif
@@ -453,10 +469,12 @@ static int xmd_ch_tty_write(
 #else
         memcpy(str, buf, len);
 #endif /* HSI_PRIVATE_INFO_PROTECTION */
+#if defined (XMD_TTY_ENABLE_ERR_MSG)
         if(simple_hsi_log_debug_enable == '1')
             printk("xmdtty: writing data of size %d to ch %d, data: %s\n", len,tty_ch->chno,str);
         else if(tty_ch->chno < 11)
             printk("xmdtty: CP received data size : %d to ch[%d] %s", len,tty_ch->chno,str);
+#endif
 
         kfree(str);
     }
