@@ -189,7 +189,7 @@ static int rprm_auxclk_request(struct rprm_elem *e, struct rprm_auxclk *obj)
 
 	sprintf(clk_name, "auxclk%d_ck", obj->id);
 //                                                                                                           
-    printk("<<< auxclk%d_ck\n", obj->id);
+    	//printk("<<< auxclk%d_ck\n", obj->id);
 //                                                                                                           
 	acd->aux_clk = clk_get(NULL, clk_name);
 	if (!acd->aux_clk) {
@@ -277,7 +277,7 @@ static void rprm_auxclk_release(struct rprm_auxclk_depot *obj)
 	clk_put((struct clk *)obj->src);
 
 //                                                                                                           
-    printk("<<< release auxclk_ck %s\n", obj->aux_clk->name);
+    //printk("<<< release auxclk_ck %s\n", obj->aux_clk->name);
 
 #if 1   // CLK_EXT_SET - OMAPS00273242
     omap_writew(0x000f, 0x4A10019A);

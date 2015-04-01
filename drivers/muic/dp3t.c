@@ -30,33 +30,33 @@ int dp3t_switch_ctrl_ops(struct muic_client_device* mcdev)
 {
 	struct dp3t_switch *dp3t;
 	unsigned long mode = mcdev->mode; 
-	pr_info("dp3t: mcdev->name , %s\n", mcdev->name);
-	pr_info("dp3t: mcdev->mode , %d\n", mcdev->mode);
+	pr_debug("dp3t: mcdev->name , %s\n", mcdev->name);
+	pr_debug("dp3t: mcdev->mode , %d\n", mcdev->mode);
 	dp3t = dev_get_drvdata(&mcdev->dev);
-	pr_info("dp3t: ctrl_ifx_vbus_gpio = %d\n", dp3t->ctrl_ifx_vbus_gpio);
-	pr_info("dp3t: ctrl_gpio1 = %d\n", dp3t->ctrl_gpio1);
-	pr_info("dp3t: ctrl_gpio2 = %d\n", dp3t->ctrl_gpio2);
+	pr_debug("dp3t: ctrl_ifx_vbus_gpio = %d\n", dp3t->ctrl_ifx_vbus_gpio);
+	pr_debug("dp3t: ctrl_gpio1 = %d\n", dp3t->ctrl_gpio1);
+	pr_debug("dp3t: ctrl_gpio2 = %d\n", dp3t->ctrl_gpio2);
 	
 	if (mode == MUIC_AP_UART) {
 		gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 0);
 		gpio_set_value(dp3t->ctrl_gpio1, 1);
 		gpio_set_value(dp3t->ctrl_gpio2, 0);
-		pr_info("dp3t: dp3t_switch_ctrl, AP UART is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, AP UART is connected to MUIC UART\n");
 	} else if (mode == MUIC_CP_UART) {
 		gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 0);
 		gpio_set_value(dp3t->ctrl_gpio1, 0);
 		gpio_set_value(dp3t->ctrl_gpio2, 1);
-		pr_info("dp3t: dp3t_switch_ctrl, CP UART is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, CP UART is connected to MUIC UART\n");
 	} else if (mode == MUIC_CP_USB) {
 		gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 1);
 		gpio_set_value(dp3t->ctrl_gpio1, 1);
 		gpio_set_value(dp3t->ctrl_gpio2, 1);
-		pr_info("dp3t: dp3t_switch_ctrl, CP USB is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, CP USB is connected to MUIC UART\n");
 	} else if (mode == MUIC_NONE) {
 		gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 0);
 		gpio_set_value(dp3t->ctrl_gpio1, 0);
 		gpio_set_value(dp3t->ctrl_gpio2, 0);
-		pr_info("dp3t: dp3t_switch_ctrl, None is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, None is connected to MUIC UART\n");
 	} else {
 		/* Just keep the current path */
 	}
@@ -72,7 +72,7 @@ int dp3t_on_none(struct muic_client_device *mcdev)
 	
 	dp3t = dev_get_drvdata(&mcdev->dev);
 
-	pr_info("dp3t: dp3t_switch_ctrl, None is connected to MUIC UART\n");
+	pr_debug("dp3t: dp3t_switch_ctrl, None is connected to MUIC UART\n");
 
 	dp3t_mode = MUIC_NONE;
 	return 0;
@@ -87,7 +87,7 @@ int dp3t_on_ap_uart(struct muic_client_device *mcdev)
 	gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 0);
 	gpio_set_value(dp3t->ctrl_gpio1, 1);
 	gpio_set_value(dp3t->ctrl_gpio2, 0);
-	pr_info("dp3t: dp3t_switch_ctrl, AP UART is connected to MUIC UART\n");
+	pr_debug("dp3t: dp3t_switch_ctrl, AP UART is connected to MUIC UART\n");
 
 	dp3t_mode = MUIC_AP_UART;
 	return 0;
@@ -102,7 +102,7 @@ int dp3t_on_cp_uart(struct muic_client_device *mcdev)
 	gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 0);
 	gpio_set_value(dp3t->ctrl_gpio1, 0);
 	gpio_set_value(dp3t->ctrl_gpio2, 1);
-	pr_info("dp3t: dp3t_switch_ctrl, CP UART is connected to MUIC UART\n");
+	pr_debug("dp3t: dp3t_switch_ctrl, CP UART is connected to MUIC UART\n");
 
 	dp3t_mode = MUIC_CP_UART;
 	return 0;
@@ -117,7 +117,7 @@ int dp3t_on_cp_usb(struct muic_client_device *mcdev)
 	gpio_set_value(dp3t->ctrl_ifx_vbus_gpio, 1);
 	gpio_set_value(dp3t->ctrl_gpio1, 1);
 	gpio_set_value(dp3t->ctrl_gpio2, 1);
-	pr_info("dp3t: dp3t_switch_ctrl, CP USB is connected to MUIC UART\n");
+	pr_debug("dp3t: dp3t_switch_ctrl, CP USB is connected to MUIC UART\n");
 
 	dp3t_mode = MUIC_CP_USB;
 	return 0;
@@ -125,28 +125,28 @@ int dp3t_on_cp_usb(struct muic_client_device *mcdev)
 
 void dp3t_switch_ctrl(TYPE_DP3T_MODE mode)
 {
-	pr_info("dp3t: dp3t_switch_ctrl()\n");
+	pr_debug("dp3t: dp3t_switch_ctrl()\n");
 
 	if (mode == DP3T_AP_UART) {
 		gpio_set_value(GPIO_IFX_USB_VBUS_EN, 0);
 		gpio_set_value(GPIO_DP3T_IN_1, 1);
 		gpio_set_value(GPIO_DP3T_IN_2, 0);
-		pr_info("dp3t: dp3t_switch_ctrl, AP UART is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, AP UART is connected to MUIC UART\n");
 	} else if (mode == DP3T_CP_UART) {
 		gpio_set_value(GPIO_IFX_USB_VBUS_EN, 0);
 		gpio_set_value(GPIO_DP3T_IN_1, 0);
 		gpio_set_value(GPIO_DP3T_IN_2, 1);
-		pr_info("dp3t: dp3t_switch_ctrl, CP UART is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, CP UART is connected to MUIC UART\n");
 	} else if (mode == DP3T_CP_USB) {
 		gpio_set_value(GPIO_IFX_USB_VBUS_EN, 1);
 		gpio_set_value(GPIO_DP3T_IN_1, 1);
 		gpio_set_value(GPIO_DP3T_IN_2, 1);
-		pr_info("dp3t: dp3t_switch_ctrl, CP USB is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, CP USB is connected to MUIC UART\n");
 	} else if (mode == DP3T_NC) {
 		gpio_set_value(GPIO_IFX_USB_VBUS_EN, 0);
 		gpio_set_value(GPIO_DP3T_IN_1, 0);
 		gpio_set_value(GPIO_DP3T_IN_2, 0);
-		pr_info("dp3t: dp3t_switch_ctrl, None is connected to MUIC UART\n");
+		pr_debug("dp3t: dp3t_switch_ctrl, None is connected to MUIC UART\n");
 	} else {
 		/* Just keep the current path */
 	}

@@ -33,6 +33,13 @@
 #include <mach/gpio.h>
 #include <linux/lge/apds9190.h>
 
+#define DEBUG_ADPS 0
+#if DEBUG_ADPS
+#define DEBUG_MSG(args...)  printk(args)
+#else
+#define DEBUG_MSG(args...)
+#endif
+
 #define APDS9190_DRV_NAME	"apds9190"
 #define DRIVER_VERSION		"1.0.5"
 
@@ -165,7 +172,7 @@ static int __init prox_cal_data(char *str)
 {
 	s32 value = simple_strtol(str, NULL, 10);
 	stored_cross_talk = value;
-	printk("ProximitySensor : cal_data = %d\n", stored_cross_talk);
+	DEBUG_MSG("ProximitySensor : cal_data = %d\n", stored_cross_talk);
 
 	return 1;
 }
@@ -382,27 +389,28 @@ static int apds_9190_init(struct i2c_client *client)
 	ret |= apds9190_set_pers(client, data->pers);	// 2 consecutive Interrupt persistence
 
 	if(ret < 0) {
-		printk("%s: configuration set failed");
+		DEBUG_MSG("%s: configuration set failed");
 		return ret;
 	}
 	data->ps_detection = 1; // we are forcing Near-to-Far interrupt, so this is defaulted to 1
 
-	printk("%s: configurations are set\n", __func__);
+	DEBUG_MSG("%s: configurations are set\n", __func__);
         return ret;
 }
 
 static void apds9190_change_ps_threshold(struct i2c_client *client)
 {
 	struct apds9190_data *data = i2c_get_clientdata(client);
+  	int irdata=0;
 
 	data->ps_data =	i2c_smbus_read_word_data(client, CMD_WORD|APDS9190_PDATAL_REG);
-	int irdata=0;
+
 	irdata = i2c_smbus_read_word_data(client, CMD_WORD|APDS9190_IRDATAL_REG);
 
-    if (wake_lock_active(&data->wakelock))
-        wake_unlock(&data->wakelock);
+    	if (wake_lock_active(&data->wakelock))
+        	wake_unlock(&data->wakelock);
 
-    wake_lock_timeout(&data->wakelock, 2*HZ);
+    	wake_lock_timeout(&data->wakelock, 2*HZ);
 
 	if ( (data->ps_data > data->pilt) && (data->ps_data >= data->piht) && (irdata != (100*(1024*(256-data->atime)))/100)) {
 		/* far-to-NEAR */
@@ -420,7 +428,7 @@ static void apds9190_change_ps_threshold(struct i2c_client *client)
 		data->pilt = data->ps_hysteresis_threshold;
 		data->piht = 1023;
 */
-		printk("\n[ProximitySensor] far-to-NEAR\n");
+		DEBUG_MSG("\n[ProximitySensor] far-to-NEAR\n");
 	}
 	else if ( (data->ps_data <= data->pilt) && (data->ps_data < data->piht) ) {
 		/* near-to-FAR */
@@ -432,7 +440,7 @@ static void apds9190_change_ps_threshold(struct i2c_client *client)
 		apds9190_set_pilt(client, 0);
 		apds9190_set_piht(client, data->ps_threshold);
 
-		printk("\n[ProximitySensor] near-to-FAR\n");
+		DEBUG_MSG("\n[ProximitySensor] near-to-FAR\n");
 	}
 	else if ( (irdata == (100*(1024*(256-data->atime)))/100) && (data->ps_detection == 1) ) {
 		/* under strong ambient light condition*/
@@ -447,8 +455,8 @@ static void apds9190_change_ps_threshold(struct i2c_client *client)
 		apds9190_set_pilt(client, data->ps_hysteresis_threshold);
 		apds9190_set_piht(client, 1023);
 
-		printk("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");		
-		printk("\n[ProximitySensor] near-to-FAR\n");
+		DEBUG_MSG("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");		
+		DEBUG_MSG("\n[ProximitySensor] near-to-FAR\n");
 	}
 	else if ( (data->pilt == 1023) && (data->piht == 0) )
 	{
@@ -461,7 +469,7 @@ static void apds9190_change_ps_threshold(struct i2c_client *client)
 		apds9190_set_pilt(client, 0);
 		apds9190_set_piht(client, data->ps_threshold);
 
-		printk("[ProximitySensor] near-to-FAR\n");
+		DEBUG_MSG("[ProximitySensor] near-to-FAR\n");
 	}
 }
 
@@ -495,7 +503,7 @@ static void apds9190_work_handler(struct work_struct *work)
 
 	i2c_smbus_write_byte_data(client, CMD_BYTE|APDS9190_ENABLE_REG, 1);	/* disable 9190's ADC first */
 
-	printk("status = %x\n", status);
+	DEBUG_MSG("status = %x\n", status);
 
 	if((status & data->enable & 0x30) == 0x30) {
 		/* both ALS and PS are interrupted */
@@ -505,11 +513,11 @@ static void apds9190_work_handler(struct work_struct *work)
 		if(cdata == 100*(1024*(256-data->atime))/100) {
 			apds9190_set_ailt(client, (99*(1024*(256-data->atime)))/100);		
 			apds9190_set_aiht(client, (100*(1024*(256-data->atime)))/100);
-			printk("* Set ALS Theshold under the strong sunlight\n");
+			DEBUG_MSG("* Set ALS Theshold under the strong sunlight\n");
 		} else {
 			apds9190_set_ailt(client, 0);		
 			apds9190_set_aiht(client, (99*(1024*(256-data->atime)))/100);
-			printk("* Set ALS Theshold for normal mode\n");
+			DEBUG_MSG("* Set ALS Theshold for normal mode\n");
 		}
 
 		/* check if this is triggered by strong ambient light  */		
@@ -520,15 +528,15 @@ static void apds9190_work_handler(struct work_struct *work)
 			if(data->ps_detection == 1) {
 				apds9190_change_ps_threshold(client);			
 				
-				printk("* Triggered by background ambient noise\n");	
-				printk("\n[ProximitySensor] near-to-FAR\n");
+				DEBUG_MSG("* Triggered by background ambient noise\n");	
+				DEBUG_MSG("\n[ProximitySensor] near-to-FAR\n");
 			} else {
 				/*Keep the threshold NEAR condition to prevent the frequent Interrupt under strong ambient light*/
 				apds9190_set_pilt(client, data->ps_hysteresis_threshold);
 				apds9190_set_piht(client, 1023);
-				printk("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");
-				printk("* Triggered by background ambient noise\n");
-				printk("\n[ProximitySensor] maintain FAR \n");
+				DEBUG_MSG("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");
+				DEBUG_MSG("* Triggered by background ambient noise\n");
+				DEBUG_MSG("\n[ProximitySensor] maintain FAR \n");
 			}
 		}
 		apds9190_set_command(client, 2);	/* 2 = CMD_CLR_PS_ALS_INT */
@@ -541,11 +549,11 @@ static void apds9190_work_handler(struct work_struct *work)
 		if(cdata == 100*(1024*(256-data->atime))/100) {
 			apds9190_set_ailt(client, (99*(1024*(256-data->atime)))/100);		
 			apds9190_set_aiht(client, (100*(1024*(256-data->atime)))/100);
-			printk("* Set ALS Theshold under the strong sunlight\n");
+			DEBUG_MSG("* Set ALS Theshold under the strong sunlight\n");
 		} else {
 			apds9190_set_ailt(client, 0);		
 			apds9190_set_aiht(client, (99*(1024*(256-data->atime)))/100);
-			printk("* Set ALS Theshold for normal mode\n");
+			DEBUG_MSG("* Set ALS Theshold for normal mode\n");
 		}
 		
 		/* check if this is triggered by strong ambient light */
@@ -555,15 +563,15 @@ static void apds9190_work_handler(struct work_struct *work)
 		else {
 			if(data->ps_detection == 1) {
 				apds9190_change_ps_threshold(client);			
-		        printk("* Triggered by background ambient noise\n");	
-				printk("\n[ProximitySensor] near-to-FAR\n");
+		        	DEBUG_MSG("* Triggered by background ambient noise\n");	
+				DEBUG_MSG("\n[ProximitySensor] near-to-FAR\n");
 			} else {
 				/*Keep the threshold NEAR condition to prevent the frequent Interrupt under strong ambient light*/
 				apds9190_set_pilt(client, data->ps_hysteresis_threshold);
 				apds9190_set_piht(client, 1023);
-				printk("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");
-				printk("* Triggered by background ambient noise\n");
-				printk("\n[ProximitySensor] maintain FAR \n");
+				DEBUG_MSG("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");
+				DEBUG_MSG("* Triggered by background ambient noise\n");
+				DEBUG_MSG("\n[ProximitySensor] maintain FAR \n");
 			}
 		}
 		apds9190_set_command(client, 0);	/* 0 = CMD_CLR_PS_INT */
@@ -576,11 +584,11 @@ static void apds9190_work_handler(struct work_struct *work)
 		if(cdata == 100*(1024*(256-data->atime))/100) {
 			apds9190_set_ailt(client, (99*(1024*(256-data->atime)))/100);		
 			apds9190_set_aiht(client, (100*(1024*(256-data->atime)))/100);
-			printk("* Set ALS Theshold under the strong sunlight\n");
+			DEBUG_MSG("* Set ALS Theshold under the strong sunlight\n");
 		} else {
 			apds9190_set_ailt(client, 0);		
 			apds9190_set_aiht(client, (99*(1024*(256-data->atime)))/100);
-			printk("* Set ALS Theshold for normal mode\n");
+			DEBUG_MSG("* Set ALS Theshold for normal mode\n");
 		}
 		
 		/* check if this is triggered by the strong ambient light */
@@ -590,15 +598,15 @@ static void apds9190_work_handler(struct work_struct *work)
 		else {
 			if(data->ps_detection == 1) {
 				apds9190_change_ps_threshold(client);			
-				printk("* Triggered by background ambient noise\n");
-				printk("\n[ProximitySensor] near-to-FAR\n");
+				DEBUG_MSG("* Triggered by background ambient noise\n");
+				DEBUG_MSG("\n[ProximitySensor] near-to-FAR\n");
 			} else {
 				/*Keep the threshold NEAR condition to prevent the frequent Interrupt under strong ambient light*/
 				apds9190_set_pilt(client, data->ps_hysteresis_threshold);
 				apds9190_set_piht(client, 1023);
-				printk("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");
-				printk("* Triggered by background ambient noise\n");
-				printk("\n[ProximitySensor] maintain FAR \n");
+				DEBUG_MSG("* Set PS Threshold NEAR condition to prevent the frequent Interrupt under strong ambient light\n");
+				DEBUG_MSG("* Triggered by background ambient noise\n");
+				DEBUG_MSG("\n[ProximitySensor] maintain FAR \n");
 			}
 		}
 		apds9190_set_command(client, 1);	/* 1 = CMD_CLR_ALS_INT */
@@ -613,16 +621,16 @@ static void apds9190_work_handler(struct work_struct *work)
 	pilt = i2c_smbus_read_word_data(client, CMD_WORD|APDS9190_PILTL_REG);
 	piht = i2c_smbus_read_word_data(client, CMD_WORD|APDS9190_PIHTL_REG);
 
-	printk("pdata = %d\n", pdata);
-	printk("cdata = %d\n", cdata);
-	printk("irdata = %d\n", irdata);
+	DEBUG_MSG("pdata = %d\n", pdata);
+	DEBUG_MSG("cdata = %d\n", cdata);
+	DEBUG_MSG("irdata = %d\n", irdata);
 	
-	printk("ailt = %d\n", ailt);
-	printk("aiht = %d\n", aiht);
-	printk("pilt = %d\n", pilt);
-	printk("piht = %d\n", piht);
+	DEBUG_MSG("ailt = %d\n", ailt);
+	DEBUG_MSG("aiht = %d\n", aiht);
+	DEBUG_MSG("pilt = %d\n", pilt);
+	DEBUG_MSG("piht = %d\n", piht);
 
-	printk("--------------------\n");
+	DEBUG_MSG("--------------------\n");
 #endif
 
 	i2c_smbus_write_byte_data(client, CMD_BYTE|APDS9190_ENABLE_REG, data->enable);	
@@ -866,29 +874,28 @@ static ssize_t apds9190_show_enable_ps_sensor(struct device *dev,
 static ssize_t apds9190_store_enable_ps_sensor(struct device *dev,
 				struct device_attribute *attr, const char *buf, size_t count)
 {
-	static bool first = true;
 	int ret;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct apds9190_data *data = i2c_get_clientdata(client);
-    struct apds9190_platform_data *pdata;
+    	struct apds9190_platform_data *pdata;
 	unsigned long val = simple_strtoul(buf, NULL, 10);
 
-    pdata = client->dev.platform_data;
-    if(pdata == NULL) {
-        return -EINVAL;
-    }
+    	pdata = client->dev.platform_data;
+    	if(pdata == NULL) {
+        	return -EINVAL;
+    	}
 
-	printk("%s: enable proximity sensor (%ld)\n", __func__, val);
+	DEBUG_MSG("%s: enable proximity sensor (%ld)\n", __func__, val);
 	
 	if ((val != 0) && (val != 1)) {
-		printk("%s: store unvalid value=%ld\n", __func__, val);
+		DEBUG_MSG("%s: store unvalid value=%ld\n", __func__, val);
 		return count;
 	}
 
 	if( !apds9190_initialized  ) {
         ret = apds_9190_init(client);
         if(ret < 0) {
-            printk("%s: apds_9190_init failed\n", __func__);
+            DEBUG_MSG("%s: apds_9190_init failed\n", __func__);
             return ret;
         }
         apds9190_initialized = 1;
@@ -946,7 +953,7 @@ static ssize_t apds9190_show_pdata(struct device *dev,
 	mutex_unlock(&data->update_lock);
 
 	if(pdata < 0) {
-		printk("%s: i2c_error\n", __func__);
+		DEBUG_MSG("%s: i2c_error\n", __func__);
 		pdata = -1;
 	}
 
@@ -978,7 +985,7 @@ static int apds9190_Run_Cross_talk_Calibration(struct i2c_client *client)
 	int i, j, temp;
 	bool isCal = false;
 
-	printk("===================================================\n%s: START proximity sensor calibration\n", __func__);
+	DEBUG_MSG("===================================================\n%s: START proximity sensor calibration\n", __func__);
 
 	// proximity enable & wait
 	apds9190_set_enable(client, 0x0D);
@@ -1004,7 +1011,7 @@ RE_CALIBRATION:
 
 	// calculate the cross-talk using central 10 data
 	for(i=5; i<15; i++) {
-        printk("pdata = %d\n", pdata[i]);
+        DEBUG_MSG("pdata = %d\n", pdata[i]);
 		total_pdata += pdata[i];
     }
 
@@ -1018,15 +1025,15 @@ RE_CALIBRATION:
 
 	// check if the calibrated cross_talk data is valid or not
 	if(data->cross_talk > 720) {
-		printk("%s: invalid calibrated data\n", __func__);
+		DEBUG_MSG("%s: invalid calibrated data\n", __func__);
 
 		if(!isCal) {
-			printk("%s: RE_CALIBRATION start\n", __func__);
+			DEBUG_MSG("%s: RE_CALIBRATION start\n", __func__);
 			isCal = true;
 			total_pdata = 0;
 			goto RE_CALIBRATION;
 		} else {
-			printk("%s: CALIBRATION FAIL -> cross_talk is set to DEFAULT\n", __func__);
+			DEBUG_MSG("%s: CALIBRATION FAIL -> cross_talk is set to DEFAULT\n", __func__);
 			data->cross_talk = DEFAULT_CROSS_TALK;
 		}
 	}
@@ -1034,7 +1041,7 @@ RE_CALIBRATION:
 	// proximity disable
 	apds9190_set_enable(client, 0x00);
 
-	printk("%s: total_pdata = %d & cross_talk = %d\n%s: FINISH proximity sensor calibration\n===================================================\n",
+	DEBUG_MSG("%s: total_pdata = %d & cross_talk = %d\n%s: FINISH proximity sensor calibration\n===================================================\n",
             __func__, total_pdata, data->cross_talk, __func__);
 
 	return data->cross_talk;
@@ -1065,7 +1072,7 @@ static ssize_t apds9190_store_run_calibration(struct device *dev,
 	apds9190_set_pilt(client, data->ps_hysteresis_threshold);
 	apds9190_set_piht(client, data->ps_threshold);
 
-	printk("%s: [piht][pilt][c_t] = [%d][%d][%d]\n",
+	DEBUG_MSG("%s: [piht][pilt][c_t] = [%d][%d][%d]\n",
 				__func__, data->ps_threshold, data->ps_hysteresis_threshold, data->cross_talk);
 
 	return count;
@@ -1090,7 +1097,7 @@ static ssize_t apds9190_store_default_crosstalk(struct device *dev,
     data->ps_threshold = DEFAULT_CROSS_TALK + ADD_TO_CROSS_TALK;
 	data->ps_hysteresis_threshold = data->ps_threshold - SUB_FROM_PS_THRESHOLD;
 
-	printk("%s: [piht][pilt][c_t] = [%d][%d][%d]\n",
+	DEBUG_MSG("%s: [piht][pilt][c_t] = [%d][%d][%d]\n",
 				__func__, data->ps_threshold, data->ps_hysteresis_threshold, data->cross_talk);
 
     return count;
@@ -1127,7 +1134,7 @@ static const struct attribute_group apds9190_attr_group = {
  */
 static int apds9190_init_client(struct i2c_client *client)
 {
-	struct apds9190_data *data = i2c_get_clientdata(client);
+	//struct apds9190_data *data = i2c_get_clientdata(client);
 	int err;
 	int id;
 
@@ -1138,10 +1145,10 @@ static int apds9190_init_client(struct i2c_client *client)
 	
 	id = i2c_smbus_read_byte_data(client, CMD_BYTE|APDS9190_ID_REG);
 	if (id == 0x29) {
-		printk("initialize APDS-9190 client\n");
+		DEBUG_MSG("initialize APDS-9190 client\n");
 	}
 	else {
-		printk("NOT APDS-9190\n");
+		DEBUG_MSG("NOT APDS-9190\n");
 		return -EIO;
 	}
 
@@ -1195,7 +1202,7 @@ static int __devinit apds9190_probe(struct i2c_client *client,
 	data->ps_threshold = data->cross_talk + ADD_TO_CROSS_TALK;
 	data->ps_hysteresis_threshold = data->ps_threshold - SUB_FROM_PS_THRESHOLD;
 
-	printk("%s(): stored_cross_talk = %d, data->cross_talk = %d\n%s(): %d < ps_data < %d\n",
+	DEBUG_MSG("%s(): stored_cross_talk = %d, data->cross_talk = %d\n%s(): %d < ps_data < %d\n",
 						__func__, stored_cross_talk, data->cross_talk,
 						__func__, data->ps_hysteresis_threshold, data->ps_threshold);
 
@@ -1217,21 +1224,21 @@ static int __devinit apds9190_probe(struct i2c_client *client,
 	data->enable_ps_sensor = 0;	// default to 0
 	
 	rdata = i2c_smbus_read_byte_data(client, CMD_BYTE|APDS9190_ID_REG);
-	printk("%s(): apds9190 ID = 0x%2x\n", __func__, rdata);
-	printk("%s(): enable = %x\n", __func__, data->enable);
+	DEBUG_MSG("%s(): apds9190 ID = 0x%2x\n", __func__, rdata);
+	DEBUG_MSG("%s(): enable = %x\n", __func__, data->enable);
 
 	mutex_init(&data->update_lock);
 
 	/* Initialize the APDS9190 chip */
 	err = apds9190_init_client(client);
 	if (err) {
-        printk("%s(): apds9190_init_client failed\n", __func__);
+        DEBUG_MSG("%s(): apds9190_init_client failed\n", __func__);
 		goto exit_kfree;
     }
 
     err = gpio_request(pdata->irq_gpio, "apds9190_irq");
     if (err) {
-        printk("%s(): gpio_request_failed\n", __func__);
+        DEBUG_MSG("%s(): gpio_request_failed\n", __func__);
 
         goto exit_kfree;
     }
@@ -1250,7 +1257,7 @@ static int __devinit apds9190_probe(struct i2c_client *client,
 	data->input_dev_ps = input_allocate_device();
 	if (!data->input_dev_ps) {
 		err = -ENOMEM;
-		printk("%s: Failed to allocate input device proximity\n", __func__);
+		DEBUG_MSG("%s: Failed to allocate input device proximity\n", __func__);
 		goto exit_input_dev_ps_alloc_failed;
 	}
 	
@@ -1263,7 +1270,7 @@ static int __devinit apds9190_probe(struct i2c_client *client,
 	err = input_register_device(data->input_dev_ps);
 	if (err) {
 		err = -ENOMEM;
-		printk("Unable to register input device proximity: %s\n",
+		DEBUG_MSG("Unable to register input device proximity: %s\n",
 		       data->input_dev_ps->name);
 		goto exit_input_dev_ps_register_device_failed;
 	}
@@ -1273,13 +1280,13 @@ static int __devinit apds9190_probe(struct i2c_client *client,
 	if (err)
 		goto exit_sysfs_create_group;
 
-	printk("%s support ver. %s enabled\n", __func__, DRIVER_VERSION);
+	DEBUG_MSG("%s support ver. %s enabled\n", __func__, DRIVER_VERSION);
 
     wake_lock_init(&data->wakelock, WAKE_LOCK_SUSPEND, data->input_dev_ps->name);
 
-	printk("-----------------------------\n");
-	printk("apds9190 driver initialized!!\n");
-	printk("-----------------------------\n");
+	DEBUG_MSG("-----------------------------\n");
+	DEBUG_MSG("apds9190 driver initialized!!\n");
+	DEBUG_MSG("-----------------------------\n");
 	return 0;
 
 exit_sysfs_create_group:
@@ -1323,7 +1330,7 @@ static int apds9190_suspend(struct i2c_client *client, pm_message_t mesg)
 {
     struct apds9190_data *data = i2c_get_clientdata(client);
 
-    printk("%s [%x]\n", __func__, data->enable);
+    DEBUG_MSG("%s [%x]\n", __func__, data->enable);
 
     if (apds9190_initialized) {
         disable_irq(data->irq);
@@ -1346,7 +1353,7 @@ static int apds9190_resume(struct i2c_client *client)
 {
     struct apds9190_data *data = i2c_get_clientdata(client);
 
-    printk("%s [%x]\n", __func__, data->enable);
+    DEBUG_MSG("%s [%x]\n", __func__, data->enable);
 
     if (apds9190_initialized)
         enable_irq(data->irq);
@@ -1383,9 +1390,9 @@ static struct i2c_driver apds9190_driver = {
 
 static int __init apds9190_init(void)
 {
-	printk("--------------------\n");
-	printk("apds9190 driver init\n");
-	printk("--------------------\n");
+	DEBUG_MSG("--------------------\n");
+	DEBUG_MSG("apds9190 driver init\n");
+	DEBUG_MSG("--------------------\n");
 	return i2c_add_driver(&apds9190_driver);
 }
 

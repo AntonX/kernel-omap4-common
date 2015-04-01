@@ -69,7 +69,7 @@ extern void usif_switch_none(int);
 
 void cp_power_down(void)
 {
-	pr_info("fota: %s\n", __func__);
+	pr_debug("fota: %s\n", __func__);
 	// PMU Reset Pin Low
 	gpio_direction_output(gpio_mdm_pwron, 0);
 	udelay(100);
@@ -82,7 +82,7 @@ void cp_power_down(void)
 
 void ifx_uart_sw_ctrl(void)
 {
-	pr_info("fota: %s\n", __func__);
+	pr_debug("fota: %s\n", __func__);
 	usif_switch_ctrl(0);
 	// dp3t_switch_ctrl(0);
 }
@@ -95,19 +95,19 @@ void ifx_power_low(void)
 	mdelay(500);
 	gpio_set_value(gpio_mdm_pwron, 0);
 	status = gpio_get_value(gpio_mdm_pwron);
-	pr_info("fota: ifx_power_low - [CP POWER]: pin %d\n", status);
-	pr_info("fota: %s: FOTA_proc_excute \n", __func__);
+	pr_debug("fota: ifx_power_low - [CP POWER]: pin %d\n", status);
+	pr_debug("fota: %s: FOTA_proc_excute \n", __func__);
 }
 
 void ifx_power_high(void)
 {
 	int status;
-	pr_info("fota: %s: FOTA_proc_excute \n", __func__);
+	pr_debug("fota: %s: FOTA_proc_excute \n", __func__);
 	gpio_direction_output(gpio_mdm_pwron, 1);
 	mdelay(500);
 	gpio_set_value(gpio_mdm_pwron, 1);
 	status = gpio_get_value(gpio_mdm_pwron);
-	pr_info("fota: ifx_power_high - [CP POWER]: pin %d\n", status);
+	pr_debug("fota: ifx_power_high - [CP POWER]: pin %d\n", status);
 }
 
 void ifx_reset_low(void)
@@ -128,35 +128,35 @@ int status;
    ifx_reset_low();
    fota_ebl_download();
 */
-	pr_info("%s: FOTA_proc_excute in  \n", __func__);
+	pr_debug("%s: FOTA_proc_excute in  \n", __func__);
 	
    	if( gpio_request( GPIO_MDM_PWR_ON, "mdm_pwr_on" ) != 0 )
-		pr_info("TS0710: %s : Warning : GPIO_MDM_PWR_ON may EBUSY\n", __func__);
+		pr_debug("TS0710: %s : Warning : GPIO_MDM_PWR_ON may EBUSY\n", __func__);
 	if( gpio_request( GPIO_MDM_RESET, "reset_mdm" ) != 0 )
-		pr_info("TS0710: %s : Warning : GPIO_MDM_RESET may EBUSY\n", __func__);
+		pr_debug("TS0710: %s : Warning : GPIO_MDM_RESET may EBUSY\n", __func__);
 		
 	gpio_direction_output( GPIO_MDM_PWR_ON, GPIO_LOW );
 	gpio_direction_output( GPIO_MDM_RESET,	GPIO_LOW );
-	pr_info("###** MODEM_RESET: Current Reset, %d\n", gpio_get_value(GPIO_MDM_RESET));
-	pr_info("###** MODEM_RESET: Current Power, %d\n", gpio_get_value(GPIO_MDM_PWR_ON));	
+	pr_debug("###** MODEM_RESET: Current Reset, %d\n", gpio_get_value(GPIO_MDM_RESET));
+	pr_debug("###** MODEM_RESET: Current Power, %d\n", gpio_get_value(GPIO_MDM_PWR_ON));	
 	msleep(200);
 
 	gpio_set_value( GPIO_MDM_PWR_ON, GPIO_HIGH );
-	pr_info("###** MODEM_RESET: After Set High of Power, %d\n", gpio_get_value(GPIO_MDM_PWR_ON));
+	pr_debug("###** MODEM_RESET: After Set High of Power, %d\n", gpio_get_value(GPIO_MDM_PWR_ON));
 	msleep(400);
 
 	gpio_set_value( GPIO_MDM_RESET, GPIO_HIGH );
-	pr_info("###** MODEM_RESET: After Set High of Reset, %d\n", gpio_get_value(GPIO_MDM_RESET));
+	pr_debug("###** MODEM_RESET: After Set High of Reset, %d\n", gpio_get_value(GPIO_MDM_RESET));
 	msleep(300);
 	
 	gpio_set_value( GPIO_MDM_RESET, GPIO_LOW );
-	pr_info("###** MODEM_RESET: After Set Low of Reset, %d\n", gpio_get_value(GPIO_MDM_RESET));	
+	pr_debug("###** MODEM_RESET: After Set Low of Reset, %d\n", gpio_get_value(GPIO_MDM_RESET));	
 	
 	usif_switch_ctrl(0);
-	pr_info("###** usif_switch_ctrl %d\n", gpio_get_value(92));
+	pr_debug("###** usif_switch_ctrl %d\n", gpio_get_value(92));
 	usif_switch_none(0); //USIF can't switch
-   gpio_free( GPIO_MDM_RESET );
-   gpio_free( GPIO_MDM_PWR_ON );
+   	gpio_free( GPIO_MDM_RESET );
+   	gpio_free( GPIO_MDM_PWR_ON );
 	msleep(2500);
 	
 	/*
@@ -168,18 +168,18 @@ int status;
 	//gpio_free( GPIO_MDM_RESET );	
        //gpio_free( GPIO_MDM_PWR_ON );	
 	
-	pr_info("%s: FOTA_proc_excute out \n", __func__);
+	pr_debug("%s: FOTA_proc_excute out \n", __func__);
 #else
 	int status;
 
-	printk("%s: CP Reset IN\n", __func__);
+	pr_debug("%s: CP Reset IN\n", __func__);
 
 	gpio_request(gpio_mdm_pwron, "ifx pwron");
 	gpio_direction_output(gpio_mdm_pwron, 0);
 	udelay(100);
 	gpio_set_value(gpio_mdm_pwron, 0);
 	status = gpio_get_value(gpio_mdm_pwron);
-	printk("%s: MODEM_GPIO_PWRON low- [CP POWER]: pin %d\n", __func__, status);
+	pr_debug("%s: MODEM_GPIO_PWRON low- [CP POWER]: pin %d\n", __func__, status);
 
 	mdelay(500); // 500mS delay
 	
@@ -187,23 +187,23 @@ int status;
 	udelay(100);
 	gpio_set_value(gpio_mdm_pwron_sw, 0);
 	status = gpio_get_value(gpio_mdm_pwron_sw);
-	printk("%s: MODEM_GPIO_PWRON_SW low- [CP POWER]: pin %d\n", __func__, status);
+	pr_debug("%s: MODEM_GPIO_PWRON_SW low- [CP POWER]: pin %d\n", __func__, status);
 	
 	mdelay(500); // 500mS delay
 
 	gpio_set_value(gpio_mdm_pwron, 1);
 	status = gpio_get_value(gpio_mdm_pwron);
-	printk("%s: MODEM_GPIO_PWRON high+ [CP POWER]: pin %d\n", __func__, status);
+	pr_debug("%s: MODEM_GPIO_PWRON high+ [CP POWER]: pin %d\n", __func__, status);
 
 	mdelay(100); // 1000mS delay
 
 	gpio_set_value(gpio_mdm_pwron_sw, 1);
 	status = gpio_get_value(gpio_mdm_pwron_sw);
-	printk("%s: MODEM_GPIO_PWRON_SW high+ [CP POWER]: pin %d\n", __func__, status);
+	pr_debug("%s: MODEM_GPIO_PWRON_SW high+ [CP POWER]: pin %d\n", __func__, status);
 
 	usif_switch_ctrl(0);
 	usif_switch_none(0); //USIF can't switch
-	printk("%s: CP Reset OUT\n", __func__);
+	pr_debug("%s: CP Reset OUT\n", __func__);
 #endif
 }
 
@@ -217,8 +217,8 @@ void ifx_pmu_reset(void)
 	getnstimeofday(&ts);
 	rtc_time_to_tm(ts.tv_sec, &tm);
 
-	pr_info("fota: %s:", __func__);
-	pr_info("fota: (%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)\n",
+	pr_debug("fota: %s:", __func__);
+	pr_debug("fota: (%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)\n",
 			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
 
@@ -226,11 +226,11 @@ void ifx_pmu_reset(void)
 	mdelay(200);
 	gpio_set_value(gpio_mdm_pwron, 0);
 	status = gpio_get_value(gpio_mdm_pwron);
-	printk("ifx_power_low- [CP POWER]: pin %d\n", status);
+	pr_debug("ifx_power_low- [CP POWER]: pin %d\n", status);
 	mdelay(200);
 	gpio_set_value(gpio_mdm_pwron, 1);
 	status = gpio_get_value(gpio_mdm_pwron);
-	printk("ifx_power_high- [CP POWER]: pin %d\n", status);
+	pr_debug("ifx_power_high- [CP POWER]: pin %d\n", status);
 	//cheolgwak 2011 02 01
 	gpio_direction_output(gpio_mdm_pwron_sw, 0);
 	udelay(100);
@@ -245,14 +245,14 @@ void ifx_fota_ready_low(void)
 {
 	gpio_set_value(MODEM_READY_CTRL_GPIO, 0);
 	gpio_direction_output(MODEM_READY_CTRL_GPIO, 0);
-	pr_info("###** ifx_fota_ready_low (122pin): status %d\n",gpio_get_value(MODEM_READY_CTRL_GPIO));
+	pr_debug("###** ifx_fota_ready_low (122pin): status %d\n",gpio_get_value(MODEM_READY_CTRL_GPIO));
 	
 }
 void ifx_fota_ready_high(void)
 {
 	gpio_set_value(MODEM_READY_CTRL_GPIO, 1);
 	gpio_direction_output(MODEM_READY_CTRL_GPIO, 1);
-	pr_info("###** ifx_fota_ready_high (122pin): status %d\n",gpio_get_value(MODEM_READY_CTRL_GPIO));
+	pr_debug("###** ifx_fota_ready_high (122pin): status %d\n",gpio_get_value(MODEM_READY_CTRL_GPIO));
 	
 }
 #endif
@@ -276,7 +276,7 @@ static ssize_t fota_test_proc_write(struct file *filp, const char *buf,
 
 	sscanf(buf, "%c", &cmd);
 
-	pr_info("fota: %s: FOTA_proc_write \n", __func__);
+	pr_debug("fota: %s: FOTA_proc_write \n", __func__);
 
 	switch (cmd) {
 	case '0':
@@ -357,10 +357,10 @@ static int __init lge_fota_test_init(void)
 #if defined ( TARGET_CARRIER_LGU )
       	ret = gpio_request(MODEM_READY_CTRL_GPIO,  "modem fota ctrl");
       	if(ret < 0) {	
-      		pr_info("MODEM_READY_CTRL_GPIO - can't get fota_ctrl GPIO\n");
+      		pr_debug("MODEM_READY_CTRL_GPIO - can't get fota_ctrl GPIO\n");
       	}
        gpio_direction_output(MODEM_READY_CTRL_GPIO, 0);
-	    pr_info("lge_fota_test_init  out\n");
+	    pr_debug("lge_fota_test_init  out\n");
 #endif
 
 	ret =  create_lge_fota_test_proc_file();
@@ -370,7 +370,7 @@ static int __init lge_fota_test_init(void)
 		return ret;
 	}
 
-	pr_info("fota: controler initialized\n");
+	pr_debug("fota: controler initialized\n");
 
 	return 0;
 }
@@ -379,9 +379,9 @@ static void __exit lge_fota_test_exit(void)
 {
 #if defined ( TARGET_CARRIER_LGU )
 	pr_err("lge_fota_test_exit  in\n");
-    gpio_free( MODEM_READY_CTRL_GPIO );
-    //gpio_free( GPIO_MDM_RESET );	
-    //gpio_free( GPIO_MDM_PWR_ON );	
+    	gpio_free( MODEM_READY_CTRL_GPIO );
+    	//gpio_free( GPIO_MDM_RESET );	
+    	//gpio_free( GPIO_MDM_PWR_ON );	
 #endif
 	remove_lge_fota_test_proc_file();
 }

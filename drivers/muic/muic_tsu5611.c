@@ -432,11 +432,11 @@ static void muic_detect_device_set_mode(struct i2c_client *client, u8 int_status
 	u8 status_val = 0;
 	TYPE_MUIC_MODE real_mode = MUIC_UNKNOWN;
 
-	dev_info(&client->dev, "%s: muic_retain_mode:%d, Int_Status:%d, INT_STATUS1:0x%2x\n",
+	dev_dbg(&client->dev, "%s: muic_retain_mode:%d, Int_Status:%d, INT_STATUS1:0x%2x\n",
 							__func__, muic_retain_mode, Int_Status, int_status1_val);
 
 	if(int_status1_val & VBUS) { /* VBUS  = HIGH */
-		dev_info(&client->dev, "%s: VBUS is High.\n", __func__);
+		dev_dbg(&client->dev, "%s: VBUS is High.\n", __func__);
 
 #if defined(CONFIG_MHL_TX_MUIC_BUG_FIX)
 		if(tsu5611_process_reset_muic(client) == SECONT_INT)
@@ -450,7 +450,7 @@ static void muic_detect_device_set_mode(struct i2c_client *client, u8 int_status
 			/* Read STATUS */
 			muic_i2c_read_byte(client, STATUS, &status_val);
 			
-			dev_info(&client->dev,"%s: STATUS: 0x%x\n", __func__, status_val);
+			dev_dbg(&client->dev,"%s: STATUS: 0x%x\n", __func__, status_val);
 
 			/* Non-standard VBUS only Car charger detection */
 			if(status_val & TIMEOUT_CD) {
@@ -473,7 +473,7 @@ static void muic_detect_device_set_mode(struct i2c_client *client, u8 int_status
 		}
 	}
 	else{ /* VBUS  = LOW */
-		dev_info(&client->dev, "%s: VBUS is Low.\n", __func__);
+		dev_dbg(&client->dev, "%s: VBUS is Low.\n", __func__);
 
 		muic_no_vbus_set_mode(int_status1_val);
 	}
@@ -487,7 +487,7 @@ static void muic_tsu5611_set_mode(struct i2c_client *client, u8 int_status1_val)
 {
 	TYPE_MUIC_MODE pre_mode = muic_get_mode();
 
-	dev_info(&client->dev, "%s: INT_STATUS1:0x%x pre_mode:%d\n",
+	dev_dbg(&client->dev, "%s: INT_STATUS1:0x%x pre_mode:%d\n",
 								__func__, int_status1_val, pre_mode);
 
 	/* Branch according to the previous muic_mode */
@@ -521,7 +521,7 @@ static void muic_tsu5611_set_mode(struct i2c_client *client, u8 int_status1_val)
 		case MUIC_AP_UART :
 		case MUIC_CP_UART :
 			 if((int_status1_val & VBUS) == 0) {
-				dev_info(&client->dev, "%s: UART is removed\n", __func__);
+				dev_dbg(&client->dev, "%s: UART is removed\n", __func__);
 
 				/* TODO: Why set OPEN???? */
 				muic_i2c_write_byte(client, SW_CONTROL, OPEN);
@@ -540,7 +540,7 @@ static void muic_tsu5611_set_mode(struct i2c_client *client, u8 int_status1_val)
 		case MUIC_TA_1A :
 		case MUIC_INVALID_CHG :
 			if (((int_status1_val & VBUS) == 0)||((int_status1_val & CHGDET) == 0)) {
-				dev_info(&client->dev, "%s: TA is removed\n", __func__);
+				dev_dbg(&client->dev, "%s: TA is removed\n", __func__);
 #if defined(CONFIG_MAX8971_CHARGER)
 				muic_set_mode_in_retain(MUIC_NONE);
 #endif
@@ -562,7 +562,7 @@ static void muic_tsu5611_set_mode(struct i2c_client *client, u8 int_status1_val)
 				 */
 				android_disconnect_from_muic();
 #endif
-				dev_info(&client->dev, "%s: USB is removed\n", __func__);
+				dev_dbg(&client->dev, "%s: USB is removed\n", __func__);
 #if defined(CONFIG_MAX8971_CHARGER)
 				muic_set_mode_in_retain(MUIC_NONE);
 #endif
@@ -578,7 +578,7 @@ static void muic_tsu5611_set_mode(struct i2c_client *client, u8 int_status1_val)
 #if defined(CONFIG_MACH_LGE)
 					android_disconnect_from_muic();
 #endif
-					dev_info(&client->dev, "%s: USB is removed and TA is plugged\n", __func__);
+					dev_dbg(&client->dev, "%s: USB is removed and TA is plugged\n", __func__);
 #if defined(CONFIG_MAX8971_CHARGER)
 					muic_set_mode_in_retain(MUIC_NONE);
 #endif
@@ -597,7 +597,7 @@ static void muic_tsu5611_set_mode(struct i2c_client *client, u8 int_status1_val)
 #if defined(CONFIG_MHL_TX_SII9244) || defined(CONFIG_MHL_TX_SII9244_LEGACY)
 		case MUIC_MHL :
 			if ((int_status1_val & VBUS) == 0) {
-				dev_info(&client->dev, "%s: MHL is removed\n", __func__);
+				dev_dbg(&client->dev, "%s: MHL is removed\n", __func__);
 #if defined(CONFIG_MAX8971_CHARGER)
 				muic_set_mode_in_retain(MUIC_NONE);
 #endif
@@ -630,19 +630,19 @@ static void muic_init_for_none_mode(struct i2c_client *client)
    */
 		if (Int_Status == SECONT_INT) {
 			if (!gpio_get_value(dev->gpio_mhl)) {
-				dev_info(&client->dev, "%s: wait for mhl switch completed\n", __func__);
+				dev_dbg(&client->dev, "%s: wait for mhl switch completed\n", __func__);
 				muic_init_tsu5611(client, DEFAULT);
 				gpio_set_value(dev->gpio_ifx_vbus, 0);
 			}
 			else {
-				dev_info(&client->dev, "%s: muic: mhl switch not completed\n", __func__);
+				dev_dbg(&client->dev, "%s: muic: mhl switch not completed\n", __func__);
 
 				while (!gpio_get_value(dev->gpio_mhl)) {
 					udelay(500);
 					muic_set_mode(MUIC_MHL);
 				}
 
-				dev_info(&client->dev, "%s: muic: mhl switch completed\n", __func__);
+				dev_dbg(&client->dev, "%s: muic: mhl switch completed\n", __func__);
 				muic_init_tsu5611(client, DEFAULT);
 				gpio_set_value(dev->gpio_ifx_vbus, 0);
 			}
@@ -652,7 +652,7 @@ static void muic_init_for_none_mode(struct i2c_client *client)
 			gpio_set_value(dev->gpio_ifx_vbus, 0);
 		}
 #else
-		dev_info(&client->dev, "%s: MUIC_UNKNOWN or MUIC_NONE mode\n", __func__);
+		dev_dbg(&client->dev, "%s: MUIC_UNKNOWN or MUIC_NONE mode\n", __func__);
 		muic_init_tsu5611(client, DEFAULT);
 		gpio_set_value(dev->gpio_ifx_vbus, 0);
 #endif
@@ -703,7 +703,7 @@ static void muic_tsu5611_wq_func(struct work_struct *work)
 
 	wake_lock(&dev->muic_wake_lock);
 
-	dev_info(&client->dev, "%s enter.\n", __func__);
+	dev_dbg(&client->dev, "%s enter.\n", __func__);
 
 	muic_tsu5611_detect_accessory(client);
 
@@ -754,7 +754,7 @@ static int muic_int_stat_read(struct muic_device *mdev, char *buf)
 		return 0;
 	}
 
-	dev_info(&client->dev, "%s: INT_STATUS1 = 0x%02x\n", __func__, (0xff & value));
+	dev_dbg(&client->dev, "%s: INT_STATUS1 = 0x%02x\n", __func__, (0xff & value));
 	
 	len = sprintf(buf, "%02x\n", 0xff & value);
 
@@ -869,7 +869,7 @@ static int __devinit muic_tsu5611_probe(struct i2c_client *client,
 	if (BOOT_RECOVERY == muic_retain_mode) { /* Recovery mode */
 		muic_init_tsu5611(client, BOOTUP);
 		muic_set_mode(MUIC_CP_UART);
-		dev_info(&client->dev, "muic: %s: BOOT_RECOVERY!\n", __func__);
+		dev_dbg(&client->dev, "muic: %s: BOOT_RECOVERY!\n", __func__);
 	}
 	else {
 		muic_init_tsu5611(client, BOOTUP);

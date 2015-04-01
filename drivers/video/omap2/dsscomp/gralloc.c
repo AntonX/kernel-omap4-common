@@ -728,7 +728,7 @@ static void dsscomp_early_suspend(struct early_suspend *h)
 	};
 	int err;
 
-	pr_info("DSSCOMP: %s\n", __func__);
+	pr_debug("DSSCOMP: %s\n", __func__);
 
 	/* use gralloc queue as we need to blank all screens */
 	blank_complete = false;
@@ -740,12 +740,12 @@ static void dsscomp_early_suspend(struct early_suspend *h)
 	if (err == 0)
 		pr_warn("DSSCOMP: timeout blanking screen\n");
 	else
-		pr_info("DSSCOMP: blanked screen\n");
+		pr_debug("DSSCOMP: blanked screen\n");
 }
 
 static void dsscomp_late_resume(struct early_suspend *h)
 {
-	pr_info("DSSCOMP: %s\n", __func__);
+	pr_debug("DSSCOMP: %s\n", __func__);
 	blanked = false;
 }
 

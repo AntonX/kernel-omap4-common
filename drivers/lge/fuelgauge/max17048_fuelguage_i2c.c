@@ -845,7 +845,7 @@ static int __devinit max17043_probe(struct i2c_client *client,
 	struct max17043_platform_data *pdata = client->dev.platform_data;
 
 	D("max17043_probe I2C...............................................");
-  printk("[juya]max17048_probe!!!");
+  //printk("[juya]max17048_probe!!!");
 	/*                                                         */
 	if (pdata == NULL)
 		return -EINVAL;

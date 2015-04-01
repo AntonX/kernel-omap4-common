@@ -26,7 +26,10 @@
 #include <lge/board_rev.h>
 #include <linux/err.h>
 #include <linux/fuel_gauge_max17048.h>
-//                                                                            
+
+#define I2C_DEBUG 0
+
+                                                                            
 #if defined(CONFIG_MAX8971_CHARGER)
 #include <linux/max8971.h>
 #endif
@@ -63,8 +66,10 @@ int device_power_control(char *reg_id, int on)
 	int regulator_status_prev = 0;
 
 	device_regulator = regulator_get_exclusive(NULL, reg_id);
-	printk(KERN_INFO "power_control: device_regulator: %p",
+#if I2C_DEBUG
+  printk(KERN_INFO "power_control: device_regulator: %p",
 	       device_regulator);
+#endif
 
 	if (IS_ERR(device_regulator)) {
 		printk(KERN_ERR
@@ -99,9 +104,11 @@ int device_power_control(char *reg_id, int on)
 
 	regulator_put(device_regulator);
 
+#if I2C_DEBUG
 	printk(KERN_INFO "power_control: %s : %s -> %s\n", reg_id,
 	       regulator_status_prev > 0 ? "ON" : "OFF",
 	       regulator_status > 0 ? "ON" : "OFF");
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(device_power_control);
@@ -646,10 +653,10 @@ static struct max8971_platform_data max8971_pdata = {
 #endif
 */
 /* add rotcpy */
-static void rotcpy(s8 dst[3 * 3], const s8 src[3 * 3])
-{
-	memcpy(dst, src, 3 * 3);
-}
+//static void rotcpy(s8 dst[3 * 3], const s8 src[3 * 3])
+//{
+//	memcpy(dst, src, 3 * 3);
+//}
 
 /*
  * define the platform_data for APDS9190

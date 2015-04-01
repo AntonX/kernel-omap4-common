@@ -542,12 +542,12 @@ void __init omap2_clk_print_new_rates(const char *hfclkin_ck_name,
 
 	hfclkin_rate = clk_get_rate(hfclkin_ck);
 
-	pr_info("Switched to new clocking rate (Crystal/Core/MPU): "
-		"%ld.%01ld/%ld/%ld MHz\n",
-		(hfclkin_rate / 1000000),
-		((hfclkin_rate / 100000) % 10),
-		(clk_get_rate(core_ck) / 1000000),
-		(clk_get_rate(mpu_ck) / 1000000));
+	//pr_info("Switched to new clocking rate (Crystal/Core/MPU): "
+	//	"%ld.%01ld/%ld/%ld MHz\n",
+	//	(hfclkin_rate / 1000000),
+	//	((hfclkin_rate / 100000) % 10),
+	//	(clk_get_rate(core_ck) / 1000000),
+	//	(clk_get_rate(mpu_ck) / 1000000));
 }
 
 /* Common data */

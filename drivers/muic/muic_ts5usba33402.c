@@ -292,12 +292,12 @@ void muic_set_charger_detect(struct i2c_client *client,
 		ret = muic_i2c_read_byte(client, STATUS, &reg_value);
 
 		if (reg_value & DCPORT) {  
-			printk("Charger ID22222\n");
+			pr_debug("Charger ID22222\n");
 			muic_i2c_write_byte(client, CONTROL_1, ID_200 | SEMREN);
 			muic_i2c_write_byte(client, CONTROL_2, INT_EN); 
 			muic_set_mode(MUIC_NA_TA);
 		} else {
-			printk("Charger ID33333\n");
+			pr_debug("Charger ID33333\n");
 			muic_set_usb_mode_detect(client);
 		}
   	}
@@ -360,7 +360,7 @@ void muic_set_device_none_detect(struct i2c_client *client,
 			Int_Status = Second_Int;
 			 //Processorcommand = PMIC_AccessorInit;// MUIC initial
 #if 0    
-			printk("\r PMIC_AccessorInit starts \r\n");
+			pr_debug("\r PMIC_AccessorInit starts \r\n");
 #endif  
 			goto RetainLabel;
 		}
@@ -522,7 +522,7 @@ void muic_set_device_none_detect(struct i2c_client *client,
 
 					/*if (Other_usb_count < 3)
 					{
-						printk("USB is Other count=%d\n", Other_usb_count);
+						pr_debug("USB is Other count=%d\n", Other_usb_count);
 						Other_usb_count = Other_usb_count+1;
 						TSU5611_Reset();
 						muic_init_ts5usba33402(DEFAULT);	// init rutain again
@@ -531,7 +531,7 @@ void muic_set_device_none_detect(struct i2c_client *client,
 					}
 					else
 					{*/
-						//printk("USB is Other AP USB\n");
+						//pr_debug("USB is Other AP USB\n");
 						muic_set_usb_mode_detect(client);
 						Int_Status = First_Int;
 					//}
@@ -698,7 +698,7 @@ s32 muic_ts5usba33402_detect_accessory(struct i2c_client *client, s32 upon_irq)
 
 		return ret;
 	}
-	// printk(KERN_INFO "[MUIC] IDNO = %d\n", (int_stat_value & IDNO));
+	// pr_debug(KERN_INFO "[MUIC] IDNO = %d\n", (int_stat_value & IDNO));
 	//                                                                                                        
 
 	/* Branch according to the previous muic_mode */
@@ -828,7 +828,7 @@ static int __init muic_state(char *str)
 {
 	s32 muic_value = simple_strtol(str, NULL, 0);
 	is_cp_retained = muic_value;
-	printk(KERN_INFO "muic: CP Retain : %d\n", muic_value);
+	pr_debug("muic: CP Retain : %d\n", muic_value);
 
 	return 1;
 }

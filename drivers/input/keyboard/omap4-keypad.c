@@ -194,6 +194,7 @@ static irqreturn_t omap4_keypad_interrupt(int irq, void *dev_id)
                             keypad_data->keymap[code],
                             (bool)(key_state[col] & (1 << row)));
 
+                            if(unlikely(debug_mask)) {
 #ifdef CONFIG_MACH_LGE_U2	/*                                                            */
                     printk("[omap4-keypad] %s KEY %s\n",
                                                 (keypad_data->keymap[code] == KEY_VOLUMEUP) ? "Vol_UP" : ((keypad_data->keymap[code] == KEY_VOLUMEDOWN) ? "Vol_DOWN" : "HOME"),
@@ -203,7 +204,7 @@ static irqreturn_t omap4_keypad_interrupt(int irq, void *dev_id)
 						(keypad_data->keymap[code] == KEY_VOLUMEUP) ? "Vol_UP" : ((keypad_data->keymap[code] == KEY_VOLUMEDOWN) ? "Vol_DOWN" : "CAPTURE"),
 						(key_state[col] & (1 << row)) ? "PRESS" : "RELEASE" );
 #endif
-
+		}				
                     break;
 				}
 
@@ -238,7 +239,9 @@ static int omap4_keypad_open(struct input_dev *input)
 	struct omap4_keypad *keypad_data = input_get_drvdata(input);
 
 #ifdef KBD_DEBUG
-	printk("omap4-keypad: omap4_keypad_open \n");
+	if(unlikely(debug_mask)) {
+		printk("omap4-keypad: omap4_keypad_open \n");
+	}
 #endif
 
 	pm_runtime_get_sync(input->dev.parent);
@@ -285,7 +288,9 @@ static void omap4_keypad_close(struct input_dev *input)
 	enable_irq(keypad_data->irq);
 
 #ifdef KBD_DEBUG
-	printk("omap4-keypad: omap4_keypad_close \n");
+	if(unlikely(debug_mask)) {
+		printk("omap4-keypad: omap4_keypad_close \n");
+	}
 #endif
 
 	pm_runtime_put_sync(input->dev.parent);

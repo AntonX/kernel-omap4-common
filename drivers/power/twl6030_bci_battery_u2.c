@@ -780,7 +780,7 @@ static void twl6030_config_min_vbus_reg(struct twl6030_bci_device_info *di,
 {
 	u8 rd_reg = 0;
 	if (value > 4760 || value < 4200) {
-		dev_dbg(di->dev, "invalid min vbus\n");
+		DPWR(di->dev, "invalid min vbus\n");
 		return;
 	}
 
@@ -794,7 +794,7 @@ static void twl6030_config_iterm_reg(struct twl6030_bci_device_info *di,
 				     unsigned int term_currentmA)
 {
 	if ((term_currentmA > 400) || (term_currentmA < 50)) {
-		dev_dbg(di->dev, "invalid termination current\n");
+		DPWR(di->dev, "invalid termination current\n");
 		return;
 	}
 
@@ -807,7 +807,7 @@ static void twl6030_config_voreg_reg(struct twl6030_bci_device_info *di,
 				     unsigned int voltagemV)
 {
 	if (voltagemV < 3500 || voltagemV > 4760) {
-		dev_dbg(di->dev, "invalid charger_voltagemV\n");
+		DPWR(di->dev, "invalid charger_voltagemV\n");
 		return;
 	}
 
@@ -826,7 +826,7 @@ static void twl6030_config_vichrg_reg(struct twl6030_bci_device_info *di,
 	else if (currentmA >= 500 && currentmA <= 1500)
 		currentmA = (currentmA - 500) / 100 + 4;
 	else {
-		dev_dbg(di->dev, "invalid charger_currentmA\n");
+		DPWR(di->dev, "invalid charger_currentmA\n");
 		return;
 	}
 
@@ -843,7 +843,7 @@ static void twl6030_config_cinlimit_reg(struct twl6030_bci_device_info *di,
 	else if (currentmA >= 750)
 		currentmA = (800 - 50) / 50;
 	else {
-		dev_dbg(di->dev, "invalid input current limit\n");
+		DPWR(di->dev, "invalid input current limit\n");
 		return;
 	}
 
@@ -855,7 +855,7 @@ static void twl6030_config_limit1_reg(struct twl6030_bci_device_info *di,
 							unsigned int voltagemV)
 {
 	if (voltagemV < 3500 || voltagemV > 4760) {
-		dev_dbg(di->dev, "invalid max_charger_voltagemV\n");
+		DPWR(di->dev, "invalid max_charger_voltagemV\n");
 		return;
 	}
 
@@ -872,7 +872,7 @@ static void twl6030_config_limit2_reg(struct twl6030_bci_device_info *di,
 	else if (currentmA >= 500 && currentmA <= 1500)
 		currentmA = (currentmA - 500) / 100 + 4;
 	else {
-		dev_dbg(di->dev, "invalid max_charger_currentmA\n");
+		DPWR(di->dev, "invalid max_charger_currentmA\n");
 		return;
 	}
 
@@ -1792,18 +1792,18 @@ static irqreturn_t twl6030charger_ctrl_interrupt(int irq, void *_di)
 
 	if (stat_set & CONTROLLER_STAT1_FAULT_WDG) {
 		charger_fault = 1;
-		dev_dbg(di->dev, "Fault watchdog fired\n");
+		DPWR(di->dev, "Fault watchdog fired\n");
 	}
 	if (stat_reset & CONTROLLER_STAT1_FAULT_WDG)
-		dev_dbg(di->dev, "Fault watchdog recovered\n");
+		DPWR(di->dev, "Fault watchdog recovered\n");
 	if (stat_set & CONTROLLER_STAT1_BAT_REMOVED)
-		dev_dbg(di->dev, "Battery removed\n");
+		DPWR(di->dev, "Battery removed\n");
 	if (stat_reset & CONTROLLER_STAT1_BAT_REMOVED)
-		dev_dbg(di->dev, "Battery inserted\n");
+		DPWR(di->dev, "Battery inserted\n");
 	if (stat_set & CONTROLLER_STAT1_BAT_TEMP_OVRANGE)
-		dev_dbg(di->dev, "Battery temperature overrange\n");
+		DPWR(di->dev, "Battery temperature overrange\n");
 	if (stat_reset & CONTROLLER_STAT1_BAT_TEMP_OVRANGE)
-		dev_dbg(di->dev, "Battery temperature within range\n");
+		DPWR(di->dev, "Battery temperature within range\n");
 
 
 /*                                              
@@ -1838,7 +1838,7 @@ static void twl6030battery_current(struct twl6030_bci_device_info *di)
 	ret = twl_i2c_read(TWL6030_MODULE_GASGAUGE, (u8 *)&read_value,
 								FG_REG_10, 2);
 	if (ret < 0) {
-		dev_dbg(di->dev, "failed to read FG_REG_10: current_now\n");
+		DPWR(di->dev, "failed to read FG_REG_10: current_now\n");
 		return;
 	}
 
@@ -2081,7 +2081,7 @@ static int get_adc_value(struct twl6030_gpadc_request* req, u16 channels)
 	ret = twl6030_gpadc_conversion(req);
 
 	if (ret < 0) {
-		dev_dbg(p_di->dev, "gpadc conversion failed: %d\n", ret);
+		DPWR(p_di->dev, "gpadc conversion failed: %d\n", ret);
 	}
 
 	return ret;
@@ -2653,7 +2653,7 @@ static void twl6030_bci_battery_work(struct work_struct *work)
 	ret = twl6030_gpadc_conversion(&req);
 
 	if (ret < 0) {
-		dev_dbg(di->dev, "gpadc conversion failed: %d\n", ret);
+		DPWR(di->dev, "gpadc conversion failed: %d\n", ret);
 		return;
 	}
 #endif

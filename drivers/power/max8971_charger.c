@@ -953,7 +953,7 @@ static int muic_control_max8971_charger(struct muic_client_device *mcdev)
 		case MUIC_NA_TA :
 		case MUIC_LG_TA :
 		case MUIC_TA_1A :
-			pr_info("%s: TA.\n", __func__);
+			pr_debug("%s: TA.\n", __func__);
 #if defined(CONFIG_MACH_LGE_U2)
 			charger_source=2;	
 			max8971_start_charging(TA_CHARING_CURRENT);
@@ -965,40 +965,40 @@ static int muic_control_max8971_charger(struct muic_client_device *mcdev)
 		case MUIC_AP_USB :
 			if(get_unlimited_temp() ==  UNLIMITED_TEMP_VAL){
 				MST_test_mode = 1;
-				pr_info("%s: AP_USB.\n", __func__);
+				pr_debug("%s: AP_USB.\n", __func__);
 				max8971_start_charging(USB_CHARING_CURRENT_MST);
 			}
 			else{
 				MST_test_mode = 0;
-				pr_info("%s: AP_USB.\n", __func__);
+				pr_debug("%s: AP_USB.\n", __func__);
 				max8971_start_charging(USB_CHARING_CURRENT);
 			}
 			break;
 
 		case MUIC_CP_USB :
-			pr_info("%s: CP_USB.\n", __func__);
+			pr_debug("%s: CP_USB.\n", __func__);
 			max8971_start_Factory_charging();
 			break;
 
 		case MUIC_CP_UART :
-			pr_info("%s: CP_UART.\n", __func__);
+			pr_debug("%s: CP_UART.\n", __func__);
 			max8971_start_Factory_charging();
 			break;
 
 		case MUIC_MHL :
-			pr_info("%s: MHL.\n", __func__);
+			pr_debug("%s: MHL.\n", __func__);
 			max8971_start_charging(400);
 			break;
 
 		case MUIC_NONE :
 			MST_test_mode=0;
 			charger_source=0;
-			pr_info("%s: NONE.\n", __func__);
+			pr_debug("%s: NONE.\n", __func__);
 			max8971_stop_charging();
 			break;
 
 		default :
-			pr_info("%s: No charging.\n", __func__);
+			pr_debug("%s: No charging.\n", __func__);
 			break;
 	}
 

@@ -109,12 +109,8 @@
 
 static struct device *cfg80211_parent_dev = NULL;
 struct wl_priv *wlcfg_drv_priv = NULL;
-#ifdef CUSTOMER_HW4
-u32 wl_dbg_level = WL_DBG_ERR | WL_DBG_P2P_ACTION;
-#else
 u32 wl_dbg_level = WL_DBG_ERR;
 //u32 wl_dbg_level = WL_DBG_ERR | WL_DBG_P2P_ACTION | WL_DBG_DBG | WL_DBG_INFO;  // CSC_ for debugging
-#endif
 
 #define MAX_WAIT_TIME 1500
 
@@ -3930,7 +3926,7 @@ wl_update_pmklist(struct net_device *dev, struct wl_pmk_list *pmk_list,
 	struct net_device *primary_dev = wl_to_prmry_ndev(wl);
 
 	if (!pmk_list) {
-		printk("pmk_list is NULL\n");
+		WL_DBG(("pmk_list is NULL\n"));
 		return -EINVAL;
 	}
 	/* pmk list is supported only for STA interface i.e. primary interface
@@ -7124,14 +7120,14 @@ wl_notify_connect_status(struct wl_priv *wl, struct net_device *ndev,
 			wl_link_up(wl);
 			act = true;
 			if (wl_is_ibssmode(wl, ndev)) {
-				printk("cfg80211_ibss_joined\n");
+				WL_DBG(("cfg80211_ibss_joined\n"));
 				cfg80211_ibss_joined(ndev, (s8 *)&e->addr,
 					GFP_KERNEL);
 				WL_DBG(("joined in IBSS network\n"));
 			} else {
 				if (!wl_get_drv_status(wl, DISCONNECTING, ndev)) {
-					printk("wl_bss_connect_done succeeded with " MACDBG "\n",
-						MAC2STRDBG((u8*)(&e->addr)));
+					WL_DBG(("wl_bss_connect_done succeeded with " MACDBG "\n",
+						MAC2STRDBG((u8*)(&e->addr))));
 					wl_bss_connect_done(wl, ndev, e, data, true);
 					WL_DBG(("joined in BSS network \"%s\"\n",
 					((struct wlc_ssid *)
@@ -7159,10 +7155,10 @@ wl_notify_connect_status(struct wl_priv *wl, struct net_device *ndev,
 				/* WLAN_REASON_UNSPECIFIED is used for hang up event in Android */
 				reason = (reason == WLAN_REASON_UNSPECIFIED)? 0 : reason;
 
-				printk("link down if %s may call cfg80211_disconnected. "
+				WL_DBG(("link down if %s may call cfg80211_disconnected. "
 					"event : %d, reason=%d from " MACDBG "\n",
 					ndev->name, event, ntoh32(e->reason),
-					MAC2STRDBG((u8*)(&e->addr)));
+					MAC2STRDBG((u8*)(&e->addr))));
 				if (memcmp(curbssid, &e->addr, ETHER_ADDR_LEN) != 0) {
 					WL_ERR(("BSSID of event is not the connected BSSID"
 						"(ignore it) cur: " MACDBG " event: " MACDBG"\n",
@@ -7190,7 +7186,7 @@ wl_notify_connect_status(struct wl_priv *wl, struct net_device *ndev,
 				}
 			}
 			else if (wl_get_drv_status(wl, CONNECTING, ndev)) {
-				printk("link down, during connecting\n");
+				WL_DBG(("link down, during connecting\n"));
 #ifdef ESCAN_RESULT_PATCH
 				if ((memcmp(connect_req_bssid, broad_bssid, ETHER_ADDR_LEN) == 0) ||
 					(memcmp(&e->addr, broad_bssid, ETHER_ADDR_LEN) == 0) ||
@@ -7206,8 +7202,8 @@ wl_notify_connect_status(struct wl_priv *wl, struct net_device *ndev,
 				complete(&wl->iface_disable);
 
 		} else if (wl_is_nonetwork(wl, e)) {
-			printk("connect failed event=%d e->status %d e->reason %d \n",
-				event, (int)ntoh32(e->status), (int)ntoh32(e->reason));
+			WL_DBG(("connect failed event=%d e->status %d e->reason %d \n",
+				event, (int)ntoh32(e->status), (int)ntoh32(e->reason)));
 			/* Clean up any pending scan request */
 			if (wl->scan_request) {
 				if (wl->escan_on) {
@@ -7220,7 +7216,7 @@ wl_notify_connect_status(struct wl_priv *wl, struct net_device *ndev,
 			if (wl_get_drv_status(wl, CONNECTING, ndev))
 				wl_bss_connect_done(wl, ndev, e, data, false);
 		} else {
-			printk("%s nothing\n", __FUNCTION__);
+			WL_DBG(("%s nothing\n", __FUNCTION__));
 		}
 	}
 	return err;
@@ -7463,8 +7459,8 @@ wl_bss_roaming_done(struct wl_priv *wl, struct net_device *ndev,
 	curbssid = wl_read_prof(wl, ndev, WL_PROF_BSSID);
 	wl_update_bss_info(wl, ndev, 1);
 	wl_update_pmklist(ndev, wl->pmk_list, err);
-	printk("wl_bss_roaming_done succeeded to " MACDBG "\n",
-		MAC2STRDBG((u8*)(&e->addr)));
+	WL_DBG(("wl_bss_roaming_done succeeded to " MACDBG "\n",
+		MAC2STRDBG((u8*)(&e->addr))));
 
 	cfg80211_roamed(ndev,
 

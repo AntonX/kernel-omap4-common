@@ -36,8 +36,8 @@
 #include <linux/wakelock.h>
 
 #define MCM_DBG_LOG 0
-#define MCM_DBG_ERR_LOG 1
-#define MCM_DBG_ERR_RECOVERY_LOG 1
+#define MCM_DBG_ERR_LOG 0
+#define MCM_DBG_ERR_RECOVERY_LOG 0
 
 //                                                  
 /* TI HSI driver (from HSI_DRIVER_VERSION 0.4.2) can suppport port 1 and 2, 
