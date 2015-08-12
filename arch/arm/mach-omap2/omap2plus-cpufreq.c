@@ -601,6 +601,8 @@ static int __cpuinit omap_cpu_init(struct cpufreq_policy *policy)
 
 	for (i = 0; freq_table[i].frequency != CPUFREQ_TABLE_END; i++)
 		max_freq = max(freq_table[i].frequency, max_freq);
+	max_thermal = max_freq;
+	current_cooling_level = 0;
 
 	/*
 	 * On OMAP SMP configuartion, both processors share the voltage
@@ -675,7 +677,7 @@ static ssize_t store_gpu_max_freq(struct cpufreq_policy *policy, const char *buf
 
         dev = omap_hwmod_name_get_dev("gpu");
 	if (IS_ERR(dev)) {
-		pr_err("gpu_oc: no gpu device, bailing\n" );
+		pr_err("%s: gpu_oc: no gpu device, bailing\n", __func__ );
 		return size;
 	}
 
@@ -767,6 +769,7 @@ static ssize_t store_uv_mv_table(struct cpufreq_policy *policy,	const char *buf,
 			ret = sscanf(buf, "%lu", &volt_cur);
 			
 			if(ret != 1) {
+				pr_err("%s: invalid voltage %d \n", __func__, ret);
 				count = -EINVAL; 
 				goto lbl_exit;
 			}
@@ -788,8 +791,8 @@ static ssize_t store_uv_mv_table(struct cpufreq_policy *policy,	const char *buf,
 					if ( opp_cur->u_volt < OMAP4430_VDD_CORE_OPP100_OV_UV ) opp_cur->u_volt = OMAP4430_VDD_CORE_OPP100_OV_UV;
 					break;
 				default:
-					pr_err("cpu uv/mv core dependent volt => %u\n", mpu_voltdm->vdd->dep_vdd_info->dep_table[i].dep_vdd_volt);
-					pr_err("freq: %d, bad voltage value %lu, bailing\n", freq_table[i].frequency, opp_cur->u_volt);
+					pr_err("%s: cpu uv/mv core dependent volt => %u,\n", __func__, mpu_voltdm->vdd->dep_vdd_info->dep_table[i].dep_vdd_volt);
+					pr_err("  freq: %d, bad voltage value %lu, bailing\n", freq_table[i].frequency, opp_cur->u_volt);
 					goto lbl_exit;
 			}
 
@@ -848,13 +851,13 @@ static ssize_t store_iva_freq_oc(struct cpufreq_policy *policy, const char *buf,
 	struct voltagedomain *mpu_voltdm;
 
 	if (iva_freq_oc < 0 || iva_freq_oc > 1 ) {
-		pr_info("iva_oc value error, bailing\n");	
+		pr_info("%s: iva_oc value error, bailing\n", __func__);	
 		return size;
 	}
 
 	mpu_voltdm = voltdm_lookup("iva");
 	if ( mpu_voltdm == NULL ) {
-		pr_info("iva_oc voltdomain error, bailing\n");			
+		pr_info("%s: iva_oc voltdomain error, bailing\n", __func__);
 		return size;
 	}
 
@@ -870,7 +873,7 @@ static ssize_t store_iva_freq_oc(struct cpufreq_policy *policy, const char *buf,
 
 	dev = omap_hwmod_name_get_dev("iva");
 	if (IS_ERR(dev)) {
-		pr_err("iva_oc: no iva device, bailing\n" );
+		pr_err("%s: iva_oc: no iva device, bailing\n", __func__ );
 		goto Exit;
 	}
 
@@ -1002,9 +1005,6 @@ static int __init omap_cpufreq_init(void)
 
 	ret = cpufreq_register_driver(&omap_driver);
 	omap_cpufreq_ready = !ret;
-
-	max_thermal = max_freq;
-	current_cooling_level = 0;
 
 	if (!ret) {
 		int t;

@@ -1622,7 +1622,7 @@ static int wl_keep_alive_set(struct net_device *dev, char* extra, int total_len)
 		 DHD_ERROR(( "%s: sscanf error. check period_msec value\n", __FUNCTION__ ));
 		 return -EINVAL;
 	}
-	DHD_ERROR(( "%s: period_msec is %d\n", __FUNCTION__, period_msec ));
+	DHD_INFO(( "%s: period_msec is %d\n", __FUNCTION__, period_msec ));
 
 	str = "mkeep_alive";
 	str_len = strlen(str);
@@ -1650,7 +1650,7 @@ static int wl_keep_alive_set(struct net_device *dev, char* extra, int total_len)
 	}
 	else
 	{
-		DHD_ERROR(("%s:keep_alive set ok. res[%d]\n",__FUNCTION__, res));
+		DHD_INFO(("%s:keep_alive set ok. res[%d]\n",__FUNCTION__, res));
 	}
 	
 	return res;
@@ -1675,7 +1675,7 @@ int wl_android_set_roam_mode(struct net_device *dev, char *command, int total_le
 		return -1;
 	}
 	else
-		DHD_ERROR(("%s: succeeded to set roaming Mode %d, error = %d\n",
+		DHD_INFO(("%s: succeeded to set roaming Mode %d, error = %d\n",
 		__FUNCTION__, mode, error));
 	return 0;
 }

@@ -784,10 +784,8 @@ int __init omap4_opp_init(void)
 		omap4_opp_enable("iva", 500000000);
 
 	/* Enable Nitro and NitroSB MPU OPPs */
-#if !defined(CONFIG_MACH_LGE_U2)
 	if (omap4_has_mpu_1_2ghz())
 		omap4_opp_enable("mpu", 1200000000);
-#endif
 	if (!trimmed)
 		pr_info("This is DPLL un-trimmed SOM. OPP is limited at 1.2 GHz\n");
 	if (omap4_has_mpu_1_5ghz() && trimmed)

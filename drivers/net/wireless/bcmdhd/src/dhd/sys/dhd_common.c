@@ -1852,7 +1852,7 @@ dhd_get_suspend_bcn_li_dtim(dhd_pub_t *dhd)
 		goto exit;
 	}
 
-	DHD_ERROR(("%s bcn_li_dtim=%d DTIM=%d Listen=%d\n",
+	DHD_INFO(("%s bcn_li_dtim=%d DTIM=%d Listen=%d\n",
 		__FUNCTION__, bcn_li_dtim, dtim_assoc, LISTEN_INTERVAL));
 
 	/* if not assocated just eixt */
@@ -2000,7 +2000,7 @@ dhd_pno_set(dhd_pub_t *dhd, wlc_ssid_t* ssids_local, int nssid, ushort scan_fr,
 	{
 		int j;
 		for (j = 0; j < nssid; j++) {
-			DHD_ERROR(("%d: scan  for  %s size =%d\n", j,
+			DHD_INFO(("%d: scan  for  %s size =%d\n", j,
 				ssids_local[j].SSID, ssids_local[j].SSID_len));
 		}
 	}

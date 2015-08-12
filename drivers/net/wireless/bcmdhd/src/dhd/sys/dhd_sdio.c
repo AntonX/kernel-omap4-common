@@ -4343,7 +4343,7 @@ dhd_bus_init(dhd_pub_t *dhdp, bool enforce_mutex)
 
 #endif /* !BCMSPI */
 
-	DHD_ERROR(("%s: enable 0x%02x, ready 0x%02x (waited %uus)\n",
+	DHD_INFO(("%s: enable 0x%02x, ready 0x%02x (waited %uus)\n",
 	          __FUNCTION__, enable, ready, tmo.elapsed));
 
 
@@ -6522,7 +6522,7 @@ dhdsdio_testrcv(dhd_bus_t *bus, void *pkt, uint seq)
 			if (bus->pktgen_total &&
 				(bus->pktgen_rcvd_rcvsession >= bus->pktgen_total)) {
 			bus->pktgen_count = 0;
-			DHD_ERROR(("Pktgen:rcv test complete!\n"));
+			DHD_INFO(("Pktgen:rcv test complete!\n"));
 			bus->pktgen_rcv_state = PKTGEN_RCV_IDLE;
 			dhdsdio_sdtest_set(bus, FALSE);
 				bus->pktgen_rcvd_rcvsession = 0;
@@ -6997,7 +6997,7 @@ dhdsdio_probe(uint16 venid, uint16 devid, uint16 bus_no, uint16 slot,
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	mutex_unlock(&_dhd_sdio_mutex_lock_);
-	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
+	DHD_INFO(("%s : the lock is released.\n", __FUNCTION__));
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) */
 
 	return bus;
@@ -7008,7 +7008,7 @@ fail:
 forcereturn:
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	mutex_unlock(&_dhd_sdio_mutex_lock_);
-	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
+	DHD_INFO(("%s : the lock is released.\n", __FUNCTION__));
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) */
 
 	return NULL;
